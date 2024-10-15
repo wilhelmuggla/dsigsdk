@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,7 +29,7 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLWrite;
 
-use Kigkonsult\DsigSdk\Dto\SignatureProperties;
+use Kigkonsult\DsigSdk\Dto\SignaturePropertiesType;
 
 /**
  * Class SignaturePropertiesTypeWriter
@@ -38,22 +38,17 @@ class SignaturePropertiesTypeWriter extends DsigWriterBase
 {
     /**
      * Write
-     * @param SignatureProperties $subject
+     * @param SignaturePropertiesType $signaturePropertiesType
      *
      */
-    public function write( SignatureProperties $subject ) : void
+    public function write( SignaturePropertiesType $signaturePropertiesType )
     {
-        $this->setWriterStartElement( self::SIGNATUREPROPERTIES, self::obtainXMLattributes( $subject ));
+        $XMLattributes = $signaturePropertiesType->getXMLattributes();
+        parent::setWriterStartElement( $this->writer, self::SIGNATUREPROPERTIES, $XMLattributes );
 
-        if( $subject->isIdSet()) {
-            $this->writeAttribute( self::ID, $subject->getId());
+        foreach( $signaturePropertiesType->getSignatureProperty() as $signatureProperty ) {
+            SignaturePropertyTypeWriter::factory( $this->writer )->write( $signatureProperty );
         }
-        if( $subject->isSignaturePropertySet()) {
-            foreach( $subject->getSignatureProperty() as $signatureProperty ) {
-                SignaturePropertyTypeWriter::factory( $this->writer )->write( $signatureProperty );
-            }
-        }
-
         $this->writer->endElement();
     }
 }

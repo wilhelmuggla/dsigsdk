@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -45,27 +45,21 @@ class X509DataType extends DsigBase
      * @var array  (keyed) element sets *[ key => value ]
      *
      *  each set key is one of
-     *      self::X509ISSUERSERIAL with type="ds:X509IssuerSerialType"/>
-     *      self::X509SKI          with type="base64Binary"/>
-     *      self::X509SUBJECTNAME  with type="string"/>
-     *      self::X509CERTIFICATE  with type="base64Binary"/>
-     *      self::X509CRL          with type="base64Binary"/>
-     *      self::ANYTYPE          with type=Any
+     *      self::X509ISSUERSERIAL
+     *        type="ds:X509IssuerSerialType"/>
+     *      self::X509SKI
+     *        type="base64Binary"/>
+     *      self::X509SUBJECTNAME
+     *        type="string"/>
+     *      self::X509CERTIFICATE
+     *        type="base64Binary"/>
+     *      self::X509CRL
+     *        type="base64Binary"/>
+     *      self::ANYTYPE
+     *         AnyType
      * maxOccurs="unbounded"
      */
-    protected array $X509DataTypes = [];
-
-    /**
-     * Factory method with one set, type and X509DataType
-     *
-     * @param string  $type
-     * @param mixed   $X509DataType
-     * @return static
-     */
-    public static function factoryX509DataType( string $type, mixed $X509DataType ) : static
-    {
-        return self::factory()->addX509DataType( $type, $X509DataType );
-    }
+    protected $X509DataTypes = [];
 
     /**
      * @return array
@@ -76,37 +70,31 @@ class X509DataType extends DsigBase
     }
 
     /**
-     * Return bool true if X509DataTypes is not empty
-     *
-     * @return bool
-     */
-    public function isX509DataTypesSet() : bool
-    {
-        return ! empty( $this->X509DataTypes );
-    }
-
-    /**
      * @param string  $type
      * @param mixed   $X509DataType
      * @return static
      * @throws InvalidArgumentException
      */
-    public function addX509DataType( string $type, mixed $X509DataType ) : static
+    public function addX509DataType( string $type, $X509DataType ) : self
     {
         switch( $type ) {
             case self::X509ISSUERSERIAL :
                 Assert::isInstanceOf( $X509DataType, X509IssuerSerialType::class  );
                 break;
-            case self::X509SKI :         // fall through
-            case self::X509SUBJECTNAME : // fall through
-            case self::X509CERTIFICATE : // fall through
+            case self::X509SKI :
+                Assert::string( $X509DataType );
+                break;
+            case self::X509SUBJECTNAME :
+                Assert::string( $X509DataType );
+                break;
+            case self::X509CERTIFICATE :
+                Assert::string( $X509DataType );
+                break;
             case self::X509CRL :
                 Assert::string( $X509DataType );
                 break;
-            case self::ANY :
-                $type = self::ANYTYPE; // fall through
             case self::ANYTYPE :
-                Assert::isInstanceOf( $X509DataType, Any::class );
+                Assert::isInstanceOf( $X509DataType, AnyType::class );
                 break;
             default :
                 throw new InvalidArgumentException(
@@ -127,7 +115,7 @@ class X509DataType extends DsigBase
      * @return static
      * @throws InvalidArgumentException
      */
-    public function setX509DataTypes( array $X509DataTypes ) : static
+    public function setX509DataTypes( array $X509DataTypes ) : self
     {
         foreach( $X509DataTypes as $ix => $element ) {
             if( ! is_array( $element )) {

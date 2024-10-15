@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -38,22 +38,30 @@ class X509IssuerSerialTypeWriter extends DsigWriterBase
 {
     /**
      * Write
-     * @param X509IssuerSerialType $subject
+     * @param X509IssuerSerialType $X509IssuerSerialType
      *
      */
-    public function write( X509IssuerSerialType $subject ) : void
+    public function write( X509IssuerSerialType $X509IssuerSerialType )
     {
-        $XMLattributes = self::obtainXMLattributes( $subject );
-        $this->setWriterStartElement( self::X509ISSUERSERIAL, $XMLattributes );
+        $XMLattributes = $X509IssuerSerialType->getXMLattributes();
+        parent::setWriterStartElement( $this->writer, self::X509ISSUERSERIAL, $XMLattributes );
 
-        if( $subject->isX509IssuerNameSet()) {
-            $this->writeTextElement( self::X509ISSUERNAME, $XMLattributes, $subject->getX509IssuerName());
-        }
-        if( $subject->isX509SerialNumberSet()) {
-            $this->writeTextElement(
-                self::X509SERIALNUMBER,
+        $X509IssuerName = $X509IssuerSerialType->getX509IssuerName();
+        if( ! empty( $X509IssuerName )) {
+            parent::writeTextElement(
+                $this->writer,
+                self::X509ISSUERNAME,
                 $XMLattributes,
-                (string) $subject->getX509SerialNumber()
+                $X509IssuerName
+            );
+        }
+        $X509SerialNumber = $X509IssuerSerialType->getX509SerialNumber();
+        if( ! empty( $X509SerialNumber )) {
+            parent::writeTextElement(
+                $this->writer,
+                self::X509SERIALNUBER,
+                $XMLattributes,
+                (string) $X509SerialNumber
             );
         }
 

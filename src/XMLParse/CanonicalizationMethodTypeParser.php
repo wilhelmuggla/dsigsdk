@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,11 +29,13 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLParse;
 
-use Kigkonsult\DsigSdk\Dto\CanonicalizationMethod;
+use Kigkonsult\DsigSdk\Dto\CanonicalizationMethodType;
 use XMLReader;
 
+use function sprintf;
+
 /**
- * Class CanonicalizationMethodParser
+ * Class CanonicalizationMethodTypeParser
  */
 class CanonicalizationMethodTypeParser extends DsigParserBase
 {
@@ -41,57 +43,52 @@ class CanonicalizationMethodTypeParser extends DsigParserBase
     /**
      * Parse
      *
-     * @return CanonicalizationMethod
+     * @return CanonicalizationMethodType
      */
-    public function parse() : CanonicalizationMethod
+    public function parse() : CanonicalizationMethodType
     {
-        $canonicalizationMethod = CanonicalizationMethod::factory()->setXMLattributes( $this->reader );
-        $this->logDebug1( __METHOD__ );
+        $canonicalizationMethodType  = CanonicalizationMethodType::factory()->setXMLattributes( $this->reader );
+        $this->logger->debug(
+            sprintf( self::$FMTnodeFound, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+        );
         if( $this->reader->hasAttributes ) {
-            $this->processNodeAttributes( $canonicalizationMethod );
-        }
-        if( ! $this->reader->isEmptyElement ) {
-            $this->processSubNodes( $canonicalizationMethod );
-        }
-        $this->logDebug4( __METHOD__ );
-        return $canonicalizationMethod;
-    }
-
-    /**
-     * @param CanonicalizationMethod $canonicalizationMethod
-     */
-    private function processNodeAttributes( CanonicalizationMethod $canonicalizationMethod ) : void
-    {
-        while( $this->reader->moveToNextAttribute()) {
-            $this->logDebug2( __METHOD__ );
-            if( CanonicalizationMethod::isXmlAttrKey( $this->reader->localName )) {
-                $canonicalizationMethod->setXMLattribute( $this->reader->localName, $this->reader->value );
+            while( $this->reader->moveToNextAttribute()) {
+                $this->logger->debug(
+                    sprintf( self::$FMTattrFound, __METHOD__, $this->reader->localName, $this->reader->value )
+                );
+                switch( $this->reader->localName ) {
+                    case self::ALGORITM :
+                        $canonicalizationMethodType->setAlgorithm( $this->reader->value );
+                        break;
+                }
             }
-            elseif( self::ALGORITM === $this->reader->localName ) {
-                $canonicalizationMethod->setAlgorithm( $this->reader->value );
-            }
-        } // end while
-        $this->reader->moveToElement();
-    }
-
-    /**
-     * @param CanonicalizationMethod $canonicalizationMethod
-     */
-    protected function processSubNodes( CanonicalizationMethod $canonicalizationMethod ) : void
-    {
+            $this->reader->moveToElement();
+        }
+        if( $this->reader->isEmptyElement ) {
+            return $canonicalizationMethodType;
+        }
         $headElement = $this->reader->localName;
+        $anyTypes    = [];
         while( @$this->reader->read()) {
-            $this->logDebug3( __METHOD__ );
+            if( XMLReader::SIGNIFICANT_WHITESPACE != $this->reader->nodeType ) {
+                $this->logger->debug(
+                    sprintf( self::$FMTreadNode, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+                );
+            }
             switch( true ) {
-                case ( XMLReader::END_ELEMENT === $this->reader->nodeType ) :
-                    if( $headElement === $this->reader->localName ) {
+                case ( XMLReader::END_ELEMENT == $this->reader->nodeType ) :
+                    if( $headElement == $this->reader->localName ) {
                         break 2;
                     }
                     break;
-                case ( XMLReader::ELEMENT === $this->reader->nodeType ) :
-                    $canonicalizationMethod->addAny( AnyTypeParser::factory( $this->reader )->parse());
+                case ( XMLReader::ELEMENT != $this->reader->nodeType ) :
+                    break;
+                default :
+                    $anyTypes[] = AnyTypeParser::factory( $this->reader )->parse();
                     break;
             } // end switch
         } // end while
+        $canonicalizationMethodType->setAny( $anyTypes );
+        return $canonicalizationMethodType;
     }
 }

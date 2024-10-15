@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -30,7 +30,6 @@ declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\Dto;
 
 use InvalidArgumentException;
-use Kigkonsult\DsigSdk\Dto\Traits\AlgorithmTrait;
 use Webmozart\Assert\Assert;
 
 use function is_array;
@@ -44,29 +43,19 @@ class SignatureMethodType extends DsigBase
     /**
      * @var array
      *
-     * array pairs of 0-1 HMACOutputLengthType (int) and/or 0-~ Any
+     * array pairs of 0-1 HMACOutputLengthType (int) and/or 0-~ AnyType
      * each pair *[ key => type ]
      * key : self::HMACOUTPUTLENGTH / self::ANYTYPE
      */
-    protected array $signatureMethodTypes = [];
+    protected $signatureMethodTypes = [];
 
     /**
      * Property, get- and setter methods for
      * var string algorithm
      *            attribute name="Algorithm" type="anyURI" use="required"
      */
-    use AlgorithmTrait;
+    use Traits\AlgorithmTrait;
 
-    /**
-     * Factory method with required algorithm
-     *
-     * @param string $algorithm
-     * @return static
-     */
-    public static function factoryAlgorithm( string $algorithm ) : static
-    {
-        return self::factory()->setAlgorithm( $algorithm );
-    }
 
     /**
      * @return array
@@ -77,22 +66,12 @@ class SignatureMethodType extends DsigBase
     }
 
     /**
-     * Return bool true if signatureMethodTypes is not empty
-     *
-     * @return bool
-     */
-    public function isSignatureMethodTypesSet() : bool
-    {
-        return ! empty( $this->signatureMethodTypes );
-    }
-
-    /**
      * @param string $type
      * @param mixed  $signatureMethodType
      * @return static
      * @throws InvalidArgumentException
      */
-    public function addSignatureMethodType( string $type, mixed $signatureMethodType ) : static
+    public function addSignatureMethodType( string $type, $signatureMethodType ) : self
     {
         switch( $type ) {
             case self::HMACOUTPUTLENGTH :
@@ -108,10 +87,8 @@ class SignatureMethodType extends DsigBase
                     )
                 );
                 break;
-            case  self::ANY :
-                $type = self::ANYTYPE; // fall through
             case  self::ANYTYPE :
-                Assert::isInstanceOf( $signatureMethodType, Any::class );
+                Assert::isInstanceOf( $signatureMethodType, AnyType::class );
                 break;
             default :
                 throw new InvalidArgumentException(
@@ -131,7 +108,7 @@ class SignatureMethodType extends DsigBase
      * @return static
      * @throws InvalidArgumentException
      */
-    public function setSignatureMethodTypes( array $signatureMethodTypes ) : static
+    public function setSignatureMethodTypes( array $signatureMethodTypes ) : self
     {
         foreach( $signatureMethodTypes as $ix1 => $elementSet ) {
             if( ! is_array( $elementSet )) {

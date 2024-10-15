@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,116 +29,80 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\Dto;
 
-use Kigkonsult\DsigSdk\Dto\Traits\IdTrait;
-use Kigkonsult\DsigSdk\Dto\Traits\TypeTrait;
-use Kigkonsult\DsigSdk\Dto\Traits\URITrait;
-
 /**
  * Class ReferenceType
  */
 class ReferenceType extends DsigBase
 {
     /**
-     * @var Transforms|null
+     * @var TransformsType
      *                     minOccurs="0"
      */
-    protected ?Transforms $transforms = null;
+    protected $transforms = null;
 
     /**
-     * @var DigestMethod|null
+     * @var DigestMethodType
      */
-    protected ?DigestMethod $digestMethod = null;
+    protected $digestMethod = null;
 
     /**
-     * @var null|string
+     * @var string
      *            base="base64Binary"
      */
-    protected ?string $digestValue = null;
+    protected $digestValue = null;
 
     /**
      * Property, get- and setter methods for
      * var string id
      *            attribute name="Id" type="ID" use="optional"
      */
-    use IdTrait;
+    use Traits\IdTrait;
 
     /**
      * Property, get- and setter methods for
      * var string type
      *            attribute name="URI" type="anyURI" use="optional"
      */
-    use URITrait;
+    use Traits\URITrait;
 
     /**
      * Property, get- and setter methods for
      * var string type
      *            attribute name="Type" type="anyURI" use="optional"
      */
-    use TypeTrait;
+    use Traits\TypeTrait;
 
     /**
-     * Factory method with digestMethod and digestValue
-     *
-     * @param DigestMethod $digestMethod
-     * @param string $digestValue
-     * @return static
+     * @return null|TransformsType
      */
-    public static function factoryDigest( DigestMethod $digestMethod, string $digestValue ) : static
-    {
-        return self::factory()
-            ->setDigestMethod( $digestMethod )
-            ->setDigestValue( $digestValue );
-    }
-
-    /**
-     * @return null|Transforms
-     */
-    public function getTransforms() : ?Transforms
+    public function getTransforms()
     {
         return $this->transforms;
     }
 
     /**
-     * Return bool true if transforms is set
-     *
-     * @return bool
-     */
-    public function isTransformsSet() : bool
-    {
-        return ( null !== $this->transforms );
-    }
-    /**
-     * @param Transforms $transforms
+     * @param TransformsType $transforms
      * @return static
      */
-    public function setTransforms( Transforms $transforms ) : static
+    public function setTransforms( TransformsType $transforms ) : self
     {
         $this->transforms = $transforms;
         return $this;
     }
 
     /**
-     * @return null|DigestMethod
+     * @return null|DigestMethodType
      */
-    public function getDigestMethod() : ?DigestMethod
+    public function getDigestMethod()
     {
         return $this->digestMethod;
     }
 
     /**
-     * Return bool true if digestMethod is set
-     *
-     * @return bool
-     */
-    public function isDigestMethodSet() : bool
-    {
-        return ( null !== $this->digestMethod );
-    }
-    /**
-     * @param DigestMethod $digestMethod
+     * @param DigestMethodType $digestMethod
      * @return static
      */
-    public function setDigestMethod( DigestMethod $digestMethod ) : static
+    public function setDigestMethod( DigestMethodType $digestMethod ) : self
     {
         $this->digestMethod = $digestMethod;
         return $this;
@@ -147,25 +111,16 @@ class ReferenceType extends DsigBase
     /**
      * @return null|string
      */
-    public function getDigestValue() : ?string
+    public function getDigestValue()
     {
         return $this->digestValue;
     }
 
     /**
-     * Return bool true if digestValue is set
-     *
-     * @return bool
-     */
-    public function isDigestValueSet() : bool
-    {
-        return ( null !== $this->digestValue );
-    }
-    /**
      * @param string $digestValue
      * @return static
      */
-    public function setDigestValue( string $digestValue ) : static
+    public function setDigestValue( string $digestValue ) : self
     {
         $this->digestValue = $digestValue;
         return $this;

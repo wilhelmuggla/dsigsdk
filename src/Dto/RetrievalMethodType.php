@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,56 +29,44 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\Dto;
 
-use Kigkonsult\DsigSdk\Dto\Traits\TypeTrait;
-use Kigkonsult\DsigSdk\Dto\Traits\URITrait;
-
 /**
  * Class RetrievalMethodType
  */
 class RetrievalMethodType extends DsigBase
 {
     /**
-     * @var Transforms|null
+     * @var TransformsType
      *                     minOccurs="0"
      */
-    protected ?Transforms $transforms = null;
+    protected $transforms = null;
 
     /**
      * Property, get- and setter methods for
      * var string type
      *            attribute name="URI" type="anyURI"
      */
-    use URITrait;
+    use Traits\URITrait;
 
     /**
      * Property, get- and setter methods for
      * var string type
      *            attribute name="Type" type="anyURI" use="optional"
      */
-    use TypeTrait;
+    use Traits\TypeTrait;
 
     /**
-     * @return null|Transforms
+     * @return null|TransformsType
      */
-    public function getTransforms() : ?Transforms
+    public function getTransforms()
     {
         return $this->transforms;
     }
 
     /**
-     * Return bool true if ransforms is set
-     *
-     * @return bool
-     */
-    public function isTransformsSet() : bool
-    {
-        return ( null !== $this->transforms );
-    }
-    /**
-     * @param Transforms $transforms
+     * @param TransformsType $transforms
      * @return static
      */
-    public function setTransforms( Transforms $transforms ) : static
+    public function setTransforms( TransformsType $transforms ) : self
     {
         $this->transforms = $transforms;
         return $this;

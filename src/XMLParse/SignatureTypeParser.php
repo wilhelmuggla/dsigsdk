@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,8 +29,10 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLParse;
 
-use Kigkonsult\DsigSdk\Dto\Signature;
+use Kigkonsult\DsigSdk\Dto\SignatureType;
 use XMLReader;
+
+use function sprintf;
 
 /**
  * Class SignatureTypeParser
@@ -40,69 +42,65 @@ class SignatureTypeParser extends DsigParserBase
     /**
      * Parse
      *
-     * @return Signature
+     * @return SignatureType
      * @todo dix xmlns
      */
-    public function parse() : Signature
+    public function parse() : SignatureType
     {
-        $signature = Signature::factory()->setXMLattributes( $this->reader );
-        $this->logDebug1( __METHOD__ );
+        $signatureType = SignatureType::factory()->setXMLattributes( $this->reader );
+        $this->logger->debug(
+            sprintf( self::$FMTnodeFound, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+        );
         if( $this->reader->hasAttributes ) {
-            $this->processNodeAttributes( $signature );
+            while( $this->reader->moveToNextAttribute()) {
+                $this->logger->debug(
+                    sprintf( self::$FMTattrFound, __METHOD__, $this->reader->localName, $this->reader->value )
+                );
+                switch( $this->reader->localName ) {
+                    case self::ID :
+                        $signatureType->setId( $this->reader->value );
+                        break;
+                    default :
+                        $signatureType->setXMLattribute( $this->reader->name, $this->reader->value );
+                        break;
+                } // end switch
+            } // end while
+            $this->reader->moveToElement();
+        } // end if
+        if( $this->reader->isEmptyElement ) {
+            return $signatureType;
         }
-        if( ! $this->reader->isEmptyElement ) {
-            $this->processSubNodes( $signature );
-        }
-        $this->logDebug4( __METHOD__ );
-        return $signature;
-    }
-
-    /**
-     * @param Signature $signature
-     */
-    private function processNodeAttributes( Signature $signature ) : void
-    {
-        while( $this->reader->moveToNextAttribute()) {
-            $this->logDebug2( __METHOD__ );
-            if( Signature::isXmlAttrKey( $this->reader->localName )) {
-                $signature->setXMLattribute( $this->reader->name, $this->reader->value );
-            }
-            elseif( self::ID === $this->reader->localName ) {
-                $signature->setId( $this->reader->value );
-            }
-        } // end while
-        $this->reader->moveToElement();
-    }
-
-    /**
-     * @param Signature $signature
-     */
-    private function processSubNodes( Signature $signature ) : void
-    {
         $headElement = $this->reader->localName;
+        $objects     = [];
         while( @$this->reader->read()) {
-            $this->logDebug3( __METHOD__ );
+            if( XMLReader::SIGNIFICANT_WHITESPACE != $this->reader->nodeType ) {
+                $this->logger->debug(
+                    sprintf( self::$FMTreadNode, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+                );
+            }
             switch( true ) {
-                case ( XMLReader::END_ELEMENT === $this->reader->nodeType ) :
-                    if( $headElement === $this->reader->localName ) {
+                case ( XMLReader::END_ELEMENT == $this->reader->nodeType ) :
+                    if( $headElement == $this->reader->localName ) {
                         break 2;
                     }
                     break;
-                case ( XMLReader::ELEMENT !== $this->reader->nodeType ) :
+                case ( XMLReader::ELEMENT != $this->reader->nodeType ) :
                     break;
-                case ( self::SIGNEDINFO === $this->reader->localName ) :
-                    $signature->setSignedInfo( SignedInfoTypeParser::factory( $this->reader )->parse());
+                case ( self::SIGNEDINFO == $this->reader->localName ) :
+                    $signatureType->setSignedInfo( SignedInfoTypeParser::factory( $this->reader )->parse());
                     break;
-                case ( self::SIGNATUREVALUE === $this->reader->localName ) :
-                    $signature->setSignatureValue( SignatureValueTypeParser::factory( $this->reader )->parse());
+                case ( self::SIGNATUREVALUE == $this->reader->localName ) :
+                    $signatureType->setSignatureValue( SignatureValueTypeParser::factory( $this->reader )->parse());
                     break;
-                case ( self::KEYINFO === $this->reader->localName ) :
-                    $signature->setKeyInfo( KeyInfoTypeParser::factory( $this->reader )->parse());
+                case ( self::KEYINFO == $this->reader->localName ) :
+                    $signatureType->setKeyInfo( KeyInfoTypeParser::factory( $this->reader )->parse());
                     break;
-                case ( self::OBJECT === $this->reader->localName ) :
-                    $signature->addObject( ObjectTypeParser::factory( $this->reader )->parse());
+                case ( self::OBJECT == $this->reader->localName ) :
+                    $objects[] = ObjectTypeParser::factory( $this->reader )->parse();
                     break;
             } // end switch
         } // end while
+        $signatureType->setObject( $objects );
+        return $signatureType;
     }
 }

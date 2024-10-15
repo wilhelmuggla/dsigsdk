@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,37 +29,25 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\DsigLoader;
 
-use Exception;
+use Kigkonsult\DsigSdk\Dto\SignaturePropertiesType as Dto;
 use Faker;
-use Kigkonsult\DsigSdk\Dto\Signature as Dto;
-use Kigkonsult\DsigSdk\Dto\Util;
 
-/**
- * Class Signature
- *
- * schemaLocation="http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd"
- * namespace="http://www.w3.org/2000/09/xmldsig#"
- */
-class Signature implements DsigLoaderInterface
+class SignaturePropertiesType
 {
     /**
      * @return Dto
-     * @throws Exception
+     * @access static
      */
     public static function loadFromFaker() : Dto
     {
         $faker = Faker\Factory::create();
 
-        $max     = random_int( 1, 2 );
-        $objects = [];
-        for( $x = 0; $x <= $max; $x++ ) {
-            $objects[] = Objekt::loadFromFaker();
+        $max = $faker->numberBetween( 1, 2 );
+        $signatureProperties = [];
+        for( $x = 0; $x < $max; $x++ ) {
+            $signatureProperties[] = SignaturePropertyType::loadFromFaker();
         }
         return Dto::factory()
-            ->setId( Util::getSalt())
-            ->setSignedInfo( SignedInfo::loadFromFaker())
-            ->setSignatureValue( SignatureValue::loadFromFaker())
-            ->setKeyInfo( KeyInfo::loadFromFaker())
-            ->setObject( $objects );
+                  ->setSignatureProperty( $signatureProperties );
     }
 }

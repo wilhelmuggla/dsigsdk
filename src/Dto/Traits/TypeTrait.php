@@ -5,7 +5,7 @@
  *
  * This file is a part of DsigSdk.
  *
- * Copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * Copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * author    Kjell-Inge Gustafsson, kigkonsult
  * Link      https://kigkonsult.se
  * Package   DsigSdk
@@ -34,34 +34,24 @@ namespace Kigkonsult\DsigSdk\Dto\Traits;
 trait TypeTrait
 {
     /**
-     * @var null|string
+     * @var string
      *          type="anyURI"
      */
-    protected ?string $type = null;
+    protected $type = null;
 
     /**
      * @return null|string
      */
-    public function getType() : ?string
+    public function getType()
     {
         return $this->type;
-    }
-
-    /**
-     * Return bool true if type is set
-     *
-     * @return bool
-     */
-    public function isTypeSet() : bool
-    {
-        return ( null !== $this->type );
     }
 
     /**
      * @param string $type
      * @return static
      */
-    public function setType( string $type ) : static
+    public function setType( string $type ) : self
     {
         $this->type = $type;
         return $this;

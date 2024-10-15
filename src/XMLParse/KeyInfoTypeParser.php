@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,10 +29,10 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLParse;
 
-use Kigkonsult\DsigSdk\Dto\KeyInfo;
+use Kigkonsult\DsigSdk\Dto\KeyInfoType;
 use XMLReader;
 
-use function in_array;
+use function sprintf;
 
 /**
  * Class KeyInfoTypeParser
@@ -42,112 +42,97 @@ class KeyInfoTypeParser extends DsigParserBase
     /**
      * Parse
      *
-     * @return KeyInfo
+     * @return KeyInfoType
      */
-    public function parse() : KeyInfo
+    public function parse() : KeyInfoType
     {
-        $keyInfo = KeyInfo::factory()->setXMLattributes( $this->reader );
-        $this->logDebug1( __METHOD__ );
+        $keyInfoType  = KeyInfoType::factory()->setXMLattributes( $this->reader );
+        $this->logger->debug(
+            sprintf( self::$FMTnodeFound, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+        );
         if( $this->reader->hasAttributes ) {
-            $this->processNodeAttributes( $keyInfo );
+            while( $this->reader->moveToNextAttribute()) {
+                $this->logger->debug(
+                    sprintf( self::$FMTattrFound, __METHOD__, $this->reader->localName, $this->reader->value )
+                );
+                switch( $this->reader->localName ) {
+                    case self::ID :
+                        $keyInfoType->setId( $this->reader->value );
+                        break;
+                } // end switch
+            } // end while
+            $this->reader->moveToElement();
         }
-        if( ! $this->reader->isEmptyElement ) {
-            $this->processSubNodes( $keyInfo );
+        if( $this->reader->isEmptyElement ) {
+            return $keyInfoType;
         }
-        $this->logDebug4( __METHOD__ );
-        return $keyInfo;
-    }
-
-    /**
-     * @param KeyInfo $keyInfo
-     */
-    private function processNodeAttributes( KeyInfo $keyInfo ) : void
-    {
-        while( $this->reader->moveToNextAttribute()) {
-            $this->logDebug2( __METHOD__ );
-            if( KeyInfo::isXmlAttrKey( $this->reader->localName )) {
-                $keyInfo->setXMLattribute( $this->reader->localName, $this->reader->value );
-            }
-            elseif( self::ID === $this->reader->localName ) {
-                $keyInfo->setId( $this->reader->value );
-            }
-        } // end while
-        $this->reader->moveToElement();
-    }
-
-    /**
-     * @param KeyInfo $keyInfo
-     */
-    protected function processSubNodes( KeyInfo $keyInfo ) : void
-    {
-        static $TEXTPROPS = [ self::KEYNAME, self::MGMTDATA ];
-        $headElement      = $this->reader->localName;
-        $currentElement   = null;
+        $headElement    = $this->reader->localName;
+        $currentElement = null;
+        $keyInfoTypes   = [];
         while( @$this->reader->read()) {
-            $this->logDebug3( __METHOD__ );
+            if( XMLReader::SIGNIFICANT_WHITESPACE != $this->reader->nodeType ) {
+                $this->logger->debug(
+                    sprintf( self::$FMTreadNode, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+                );
+            }
             switch( true ) {
-                case ( XMLReader::END_ELEMENT === $this->reader->nodeType ) :
-                    if( $headElement === $this->reader->localName ) {
+                case ( XMLReader::END_ELEMENT == $this->reader->nodeType ) :
+                    if( $headElement == $this->reader->localName ) {
                         break 2;
                     }
                     $currentElement = null;
                     break;
-                case ( $this->isNonEmptyTextNode( $this->reader->nodeType ) && ! empty( $currentElement )) :
-                    if( self::KEYNAME === $currentElement ) {
-                        $keyInfo->addKeyInfoType( self::KEYNAME, $this->reader->value );
-                    }
-                    elseif( self::MGMTDATA === $currentElement ) {
-                        $keyInfo->addKeyInfoType( self::MGMTDATA, $this->reader->value );
+                case ( XMLReader::TEXT == $this->reader->nodeType ) :
+                    switch( true ) {
+                        case ( ! $this->reader->hasValue ) :
+                            break;
+                        case ( empty( $currentElement )) :
+                            break;
+                        case ( self::KEYNAME == $currentElement ) :
+                            $keyInfoTypes[] = [ self::KEYNAME => $this->reader->value ];
+                            break;
+                        case ( self::MGMTDATA == $currentElement ) :
+                            $keyInfoTypes[] = [ self::MGMTDATA  => $this->reader->value ];
+                            break;
                     }
                     break;
-                case ( XMLReader::ELEMENT !== $this->reader->nodeType ) :
+                case ( XMLReader::ELEMENT != $this->reader->nodeType ) :
                     $currentElement = null;
                     break;
-                case in_array( $this->reader->localName, $TEXTPROPS, true ) :
+                case ( self::KEYNAME == $this->reader->localName ) :
                     $currentElement = $this->reader->localName;
                     break;
-                case ( self::KEYVALUE === $this->reader->localName ) :
-                    $keyInfo->addKeyInfoType(
-                        self::KEYVALUE,
-                        KeyValueTypeParser::factory( $this->reader )->parse()
-                    );
+                case ( self::KEYVALUE == $this->reader->localName ) :
+                    $keyInfoTypes[] = [ self::KEYVALUE => KeyValueTypeParser::factory( $this->reader )->parse() ];
                     break;
-                case ( self::RETRIEVALMETHOD === $this->reader->localName ) :
-                    $keyInfo->addKeyInfoType(
-                        self::RETRIEVALMETHOD,
-                        RetrievalMethodTypeParser::factory( $this->reader )->parse()
-                    );
+                case ( self::RETRIEVALMETHOD == $this->reader->localName ) :
+                    $keyInfoTypes[] = [
+                        self::RETRIEVALMETHOD => RetrievalMethodTypeParser::factory( $this->reader )->parse()
+                    ];
                     $currentElement = null;
                     break;
-                case ( self::X509DATA === $this->reader->localName ) :
-                    $keyInfo->addKeyInfoType(
-                        self::X509DATA,
-                        X509DataTypeParser::factory( $this->reader )->parse()
-                    );
+                case ( self::X509DATA == $this->reader->localName ) :
+                    $keyInfoTypes[] = [ self::X509DATA => X509DataTypeParser::factory( $this->reader )->parse() ];
                     $currentElement = null;
                     break;
-                case ( self::PGPDATA === $this->reader->localName ) :
-                    $keyInfo->addKeyInfoType(
-                        self::PGPDATA,
-                        PGPDataTypeParser::factory( $this->reader )->parse()
-                    );
+                case ( self::PGPDATA == $this->reader->localName ) :
+                    $keyInfoTypes[] = [ self::PGPDATA => PGPDataTypeParser::factory( $this->reader )->parse() ];
                     $currentElement = null;
                     break;
-                case ( self::SPKIDATA === $this->reader->localName ) :
-                    $keyInfo->addKeyInfoType(
-                        self::SPKIDATA,
-                        SPKIDataTypeParser::factory( $this->reader )->parse()
-                    );
+                case ( self::SPKIDATA == $this->reader->localName ) :
+                    $keyInfoTypes[] = [ self::SPKIDATA => SPKIDataTypeParser::factory( $this->reader )->parse() ];
                     $currentElement = null;
+                    break;
+                case ( self::MGMTDATA == $this->reader->localName ) :
+                    $currentElement = $this->reader->localName;
                     break;
                 default :
-                    $keyInfo->addKeyInfoType(
-                        self::ANYTYPE,
-                        AnyTypeParser::factory( $this->reader )->parse()
-                    );
+                    $keyInfoTypes[] = [ self::ANYTYPE => AnyTypeParser::factory( $this->reader )->parse() ];
                     $currentElement = null;
                     break;
             } // end switch
         } // end while
+        $keyInfoType->setKeyInfoType( $keyInfoTypes );
+        return $keyInfoType;
     }
 }

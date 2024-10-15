@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,42 +29,30 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\DsigLoader;
 
-use Exception;
 use Faker;
 use Kigkonsult\DsigSdk\DsigInterface;
-use Kigkonsult\DsigSdk\Dto\Objekt as Dto;
-use Kigkonsult\DsigSdk\Dto\Util;
+use Kigkonsult\DsigSdk\Dto\X509DataType as Dto;
 
-/**
- * Class Objekt
- */
-class Objekt implements DsigInterface
+use function base64_encode;
+
+class X509DataType  implements DsigInterface
 {
     /**
      * @return Dto
-     * @throws Exception
+     * @access static
      */
     public static function loadFromFaker() : Dto
     {
         $faker = Faker\Factory::create();
 
-        $objectTypes = [ // assure at least one of each
-            [ self::MANIFEST => Manifest::loadFromFaker() ],
-            [ self::SIGNATUREPROPERTIES => SignatureProperties::loadFromFaker() ],
-            [ self::ANYTYPE => Any::loadFromFaker() ]
-        ];
-        $max = random_int( 2, 3 );
-        for( $x = 0; $x < $max; $x++ ) {
-            $objectTypes[] = match ( random_int( 1, 3 ) ) {
-                1 => [ self::MANIFEST => Manifest::loadFromFaker() ],
-                2 => [ self::SIGNATUREPROPERTIES => SignatureProperties::loadFromFaker() ],
-                3 => [ self::ANYTYPE => Any::loadFromFaker() ],
-            }; // end switch
-        } // end foreach
         return Dto::factory()
-            ->setObjectTypes( $objectTypes )
-            ->setId( Util::getSalt())
-            ->setMimeType( $faker->mimeType )
-            ->setEncoding( 'UTF-8' );
+                  ->setX509DataTypes( [
+                      [ self::X509ISSUERSERIAL => X509IssuerSerialType::loadFromFaker() ],
+                      [ self::X509SKI          => base64_encode( $faker->sha256 ) ],
+                      [ self::X509SUBJECTNAME  => $faker->company ],
+                      [ self::X509CERTIFICATE  => base64_encode( $faker->sha256 ) ],
+                      [ self::X509CRL          => base64_encode( $faker->sha256 ) ],
+                      [ self::ANYTYPE          => AnyType::loadFromFaker() ],
+                  ] );
     }
 }

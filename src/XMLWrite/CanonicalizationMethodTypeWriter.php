@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,7 +29,7 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLWrite;
 
-use Kigkonsult\DsigSdk\Dto\CanonicalizationMethod;
+use Kigkonsult\DsigSdk\Dto\CanonicalizationMethodType;
 
 /**
  * Class CanonicalizationMethodTypeWriter
@@ -38,25 +38,22 @@ class CanonicalizationMethodTypeWriter extends DsigWriterBase
 {
     /**
      * Write
+     * @param CanonicalizationMethodType $canonicalizationMethodType
      *
-     * @param CanonicalizationMethod $subject
-     * @return void
      */
-    public function write( CanonicalizationMethod $subject ) : void
-    {
-        $this->setWriterStartElement(
-            self::CANONICALIZATIONMETHOD,
-            self::obtainXMLattributes( $subject )
+    public function write( CanonicalizationMethodType $canonicalizationMethodType ) {
+        parent::setWriterStartElement(
+            $this->writer, self::CANONICALIZATIONMETHOD, $canonicalizationMethodType->getXMLattributes()
         );
 
-        if( $subject->isAlgorithmSet()) {
-            $this->writeAttribute(  self::ALGORITM, $subject->getAlgorithm());
-        }
+        parent::writeAttribute(
+            $this->writer,
+            self::ALGORITM,
+            $canonicalizationMethodType->getAlgorithm()
+        );
 
-        if( $subject->isAnySet()) {
-            foreach( $subject->getAny() as $any ) {
-                AnyTypeWriter::factory( $this->writer )->write( $any );
-            }
+        foreach( $canonicalizationMethodType->getAny() as $any) {
+            AnyTypeWriter::factory( $this->writer )->write( $any );
         }
 
         $this->writer->endElement();

@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -28,9 +28,6 @@
  */
 namespace Kigkonsult\DsigSdk\Dto;
 
-use Kigkonsult\DsigSdk\Dto\Traits\AlgorithmTrait;
-use Kigkonsult\DsigSdk\Dto\Traits\AnyTypesTrait;
-
 /**
  * Class DigestMethodType
  */
@@ -38,26 +35,15 @@ class DigestMethodType extends DsigBase
 {
     /**
      * Property, get- and setter methods
-     * var Any[]  any
+     * var AnyType[]  any
      *                namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"
      */
-    use AnyTypesTrait;
+    use Traits\AnyTypesTrait;
 
     /**
      * Property, get- and setter methods for
      * var string algorithm
      *            attribute name="Algorithm" type="anyURI" use="required"
      */
-    use AlgorithmTrait;
-
-    /**
-     * Factory method with required algorithm
-     *
-     * @param string $algorithm
-     * @return static
-     */
-    public static function factoryAlgorithm( string $algorithm ) : static
-    {
-        return self::factory()->setAlgorithm( $algorithm );
-    }
+    use Traits\AlgorithmTrait;
 }

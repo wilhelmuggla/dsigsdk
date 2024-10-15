@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -30,25 +30,22 @@ declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\DsigLoader;
 
 use Faker;
-use Kigkonsult\DsigSdk\Dto\DSAKeyValue as Dto;
-use Kigkonsult\DsigSdk\Dto\Util;
+use Kigkonsult\DsigSdk\Dto\RSAKeyValueType as Dto;
 
-class DSAKeyValue
+use function base64_encode;
+
+class RSAKeyValueType
 {
     /**
      * @return Dto
+     * @access static
      */
     public static function loadFromFaker() : Dto
     {
         $faker = Faker\Factory::create();
 
         return Dto::factory()
-                  ->setP( base64_encode( $faker->sha256 ))
-                  ->setQ( base64_encode( $faker->sha256 ))
-                  ->setG( base64_encode( $faker->sha256 ))
-                  ->setY( base64_encode( $faker->sha256 ))
-                  ->setJ( base64_encode( $faker->sha256 ))
-                  ->setSeed( Util::getSalt())
-                  ->setPgenCounter( Util::getSalt( 256 ));
+                  ->setModulus( base64_encode( $faker->sha256 ))
+                  ->setExponent( base64_encode( $faker->sha256 ));
     }
 }

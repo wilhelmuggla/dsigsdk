@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,35 +29,27 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\DsigLoader;
 
-use Exception;
-use Kigkonsult\DsigSdk\DsigInterface;
-use Kigkonsult\DsigSdk\Dto\SignatureMethod as Dto;
+use Kigkonsult\DsigSdk\Dto\CanonicalizationMethodType as Dto;
 use Faker;
 
-class SignatureMethod implements DsigInterface, DsigLoaderInterface
+class CanonicalizationMethodType implements DsigLoaderInterface
 {
     /**
      * @return Dto
-     * @throws Exception
+     * @access static
      */
     public static function loadFromFaker() : Dto
     {
         $faker = Faker\Factory::create();
 
-        $max = random_int( 1, 5 );
-        $signatureMethodTypes = [];
-        for( $x = 0; $x <= $max; $x++ ) {
-            if( 1 === random_int( 1, 2 )) {
-                $signatureMethodTypes[] =
-                    [ self::HMACOUTPUTLENGTH => ( 8 * random_int( 11, 14 )) ];
-            }
-            $max2 = random_int( 0, 2 );
-            for( $x2 = 0; $x2 < $max2; $x2++ ) {
-                $signatureMethodTypes[] =
-                    [ self::ANYTYPE => Any::loadFromFaker() ];
-            }
-        } // end for
-        return Dto::factoryAlgorithm( self::ALGORITHMS[random_int( 0, count( self::ALGORITHMS ) - 1 )] )
-            ->setSignatureMethodTypes( $signatureMethodTypes );
+        $max  = $faker->numberBetween( 1, 2 );
+        $anys = [];
+        for( $x = 0; $x < $max; $x++ ) {
+            $anys[] = AnyType::loadFromFaker();
+        }
+
+        return Dto::factory()
+                  ->setAny( $anys )
+                  ->setAlgorithm( self::ALGORITHMS[mt_rand( 0, count( self::ALGORITHMS ) - 1 )] );
     }
 }

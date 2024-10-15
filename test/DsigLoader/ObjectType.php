@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,25 +29,43 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\DsigLoader;
 
-use Exception;
-// use Faker;
-use Kigkonsult\DsigSdk\Dto\SignedInfo as Dto;
+use Faker;
+use Kigkonsult\DsigSdk\DsigInterface;
+use Kigkonsult\DsigSdk\Dto\ObjectType as Dto;
 use Kigkonsult\DsigSdk\Dto\Util;
 
-class SignedInfo
+/**
+ * Class ObjectType
+ */
+class ObjectType implements DsigInterface
 {
     /**
      * @return Dto
-     * @throws Exception
+     * @access static
      */
     public static function loadFromFaker() : Dto
     {
-//        $faker = Faker\Factory::create();
+        $faker = Faker\Factory::create();
 
+        $max         = $faker->numberBetween( 4, 6 );
+        $objectTypes = [];
+        for( $x = 0; $x < $max; $x++ ) {
+            switch( $faker->numberBetween( 1, 3 )) {
+                case 1 :
+                    $objectTypes[] = [ self::MANIFEST => ManifestType::loadFromFaker() ];
+                    break;
+                case 2 :
+                    $objectTypes[] = [ self::SIGNATUREPROPERTIES => SignaturePropertiesType::loadFromFaker() ];
+                    break;
+                case 3 :
+                    $objectTypes[] = [ self::ANYTYPE => AnyType::loadFromFaker() ];
+                    break;
+            } // end switch
+        } // end foreach
         return Dto::factory()
-            ->setId( Util::getSalt())
-            ->setCanonicalizationMethod( CanonicalizationMethod::loadFromFaker())
-            ->setSignatureMethod( SignatureMethod::loadFromFaker())
-            ->setReference( [ Reference::loadFromFaker() ] );
+                  ->setObjectTypes( $objectTypes )
+                  ->setId( Util::getSalt())
+                  ->setMimeType( $faker->mimeType )
+                  ->setEncoding( 'UTF-8' );
     }
 }

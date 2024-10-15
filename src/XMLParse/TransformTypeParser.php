@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,8 +29,10 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLParse;
 
-use Kigkonsult\DsigSdk\Dto\Transform;
+use Kigkonsult\DsigSdk\Dto\TransformType;
 use XMLReader;
+
+use function sprintf;
 
 /**
  * Class TransformTypeParser
@@ -40,69 +42,63 @@ class TransformTypeParser extends DsigParserBase
     /**
      * Parse
      *
-     * @return Transform
+     * @return TransformType
      */
-    public function parse() : Transform
+    public function parse() : TransformType
     {
-        $transform  = Transform::factory()->setXMLattributes( $this->reader );
-        $this->logDebug1( __METHOD__ );
+        $transformType  = TransformType::factory()->setXMLattributes( $this->reader );
+        $this->logger->debug(
+            sprintf( self::$FMTnodeFound, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+        );
         if( $this->reader->hasAttributes ) {
-            $this->processNodeAttributes( $transform );
+            while( $this->reader->moveToNextAttribute()) {
+                $this->logger->debug(
+                    sprintf( self::$FMTattrFound, __METHOD__, $this->reader->localName, $this->reader->value )
+                );
+                switch( $this->reader->localName ) {
+                    case self::ALGORITM :
+                        $transformType->setAlgorithm( $this->reader->value );
+                        break;
+                } // end switch
+            } // end while
+            $this->reader->moveToElement();
         }
-        if( ! $this->reader->isEmptyElement ) {
-            $this->processSubNodes( $transform );
+        if( $this->reader->isEmptyElement ) {
+            return $transformType;
         }
-        $this->logDebug4( __METHOD__ );
-        return $transform;
-    }
-
-    /**
-     * @param Transform $transform
-     */
-    private function processNodeAttributes( Transform $transform ) : void
-    {
-        while( $this->reader->moveToNextAttribute()) {
-            $this->logDebug2( __METHOD__ );
-            if( Transform::isXmlAttrKey( $this->reader->localName )) {
-                $transform->setXMLattribute( $this->reader->name, $this->reader->value );
-            }
-            elseif( self::ALGORITM === $this->reader->localName ) {
-                $transform->setAlgorithm( $this->reader->value );
-            }
-        } // end while
-        $this->reader->moveToElement();
-    }
-
-    /**
-     * @param Transform $transform
-     */
-    private function processSubNodes( Transform $transform ) : void
-    {
         $headElement    = $this->reader->localName;
         $currentElement = null;
+        $transformTypes = [];
         while( @$this->reader->read()) {
-            $this->logDebug3( __METHOD__ );
+            if( XMLReader::SIGNIFICANT_WHITESPACE != $this->reader->nodeType ) {
+                $this->logger->debug(
+                    sprintf( self::$FMTreadNode, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+                );
+            }
             switch( true ) {
-                case ( XMLReader::END_ELEMENT === $this->reader->nodeType ) :
-                    if( $headElement === $this->reader->localName ) {
+                case ( XMLReader::END_ELEMENT == $this->reader->nodeType ) :
+                    if( $headElement == $this->reader->localName ) {
                         break 2;
                     }
                     $currentElement = null;
                     break;
-                case ( $this->isNonEmptyTextNode( $this->reader->nodeType ) &&
-                    ( self::XPATH === $currentElement )) :
-                    $transform->addTransformType( self::XPATH, $this->reader->value );
+                case ( XMLReader::TEXT == $this->reader->nodeType ) :
+                    if( $this->reader->hasValue  && ( self::XPATH == $currentElement )) {
+                        $transformTypes[] = [ self::XPATH => $this->reader->value ];
+                    }
                     break;
-                case ( XMLReader::ELEMENT !== $this->reader->nodeType ) :
+                case ( XMLReader::ELEMENT != $this->reader->nodeType ) :
                     break;
-                case ( self::XPATH === $this->reader->localName ) :
+                case ( self::XPATH == $this->reader->localName ) :
                     $currentElement = $this->reader->localName;
                     break;
                 default :
-                    $transform->addTransformType( self::ANYTYPE, AnyTypeParser::factory( $this->reader )->parse());
+                    $transformTypes[] = [ self::ANYTYPE => AnyTypeParser::factory( $this->reader )->parse() ];
                     $currentElement   = null;
                     break;
             } // end switch
         } // end while
+        $transformType->setTransformTypes( $transformTypes );
+        return $transformType;
     }
 }

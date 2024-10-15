@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -35,71 +35,57 @@ namespace Kigkonsult\DsigSdk\Dto;
 class DSAKeyValueType extends DsigBase
 {
     /**
-     * @var null|string  type="ds:CryptoBinary" -  base="base64Binary"
+     * @var string  type="ds:CryptoBinary" -  base="base64Binary"
      *              minOccurs="0"
      */
-    protected ?string $p = null;
+    protected $p = null;
 
     /**
-     * @var null|string  type="ds:CryptoBinary" -  base="base64Binary"
+     * @var string  type="ds:CryptoBinary" -  base="base64Binary"
      *              minOccurs="0"
      */
-    protected ?string $q = null;
+    protected $q = null;
 
     /**
-     * @var null|string  type="ds:CryptoBinary" -  base="base64Binary"
+     * @var string  type="ds:CryptoBinary" -  base="base64Binary"
      *              minOccurs="0"
      */
-    protected ?string $g = null;
+    protected $g = null;
 
     /**
-     * @var null|string  type="ds:CryptoBinary" -  base="base64Binary"
+     * @var string  type="ds:CryptoBinary" -  base="base64Binary"
      */
-    protected ?string $y = null;
+    protected $y = null;
 
     /**
-     * @var null|string  type="ds:CryptoBinary" -  base="base64Binary"
+     * @var string  type="ds:CryptoBinary" -  base="base64Binary"
      *              minOccurs="0"
      */
-    protected ?string $j = null;
+    protected $j = null;
 
     /**
-     * @var null|string  type="ds:CryptoBinary" -  base="base64Binary"
-     *
-     * seed and pgenCounter OR none
+     * @var string  type="ds:CryptoBinary" -  base="base64Binary"
      */
-    protected ?string $seed = null;
+    protected $seed = null;
 
     /**
-     * @var null|string  type="ds:CryptoBinary" -  base="base64Binary"
-     *
-     * seed and pgenCounter OR none
+     * @var string  type="ds:CryptoBinary" -  base="base64Binary"
      */
-    protected ?string $pgenCounter = null;
+    protected $pgenCounter = null;
 
     /**
      * @return null|string
      */
-    public function getP() : ?string
+    public function getP()
     {
         return $this->p;
-    }
-
-    /**
-     * Return bool true if p is set
-     *
-     * @return bool
-     */
-    public function isPSet() : bool
-    {
-        return ( null !== $this->p );
     }
 
     /**
      * @param string $p
      * @return static
      */
-    public function setP( string $p ) : static
+    public function setP( string $p ) : self
     {
         $this->p = $p;
         return $this;
@@ -108,26 +94,16 @@ class DSAKeyValueType extends DsigBase
     /**
      * @return null|string
      */
-    public function getQ() : ?string
+    public function getQ()
     {
         return $this->q;
-    }
-
-    /**
-     * Return bool true if q is set
-     *
-     * @return bool
-     */
-    public function isQSet() : bool
-    {
-        return ( null !== $this->q );
     }
 
     /**
      * @param string $q
      * @return static
      */
-    public function setQ( string $q ) : static
+    public function setQ( string $q ) : self
     {
         $this->q = $q;
         return $this;
@@ -136,26 +112,16 @@ class DSAKeyValueType extends DsigBase
     /**
      * @return null|string
      */
-    public function getG() : ?string
+    public function getG()
     {
         return $this->g;
-    }
-
-    /**
-     * Return bool true if g is set
-     *
-     * @return bool
-     */
-    public function isGSet() : bool
-    {
-        return ( null !== $this->g );
     }
 
     /**
      * @param string $g
      * @return static
      */
-    public function setG( string $g ) : static
+    public function setG( string $g ) : self
     {
         $this->g = $g;
         return $this;
@@ -164,26 +130,16 @@ class DSAKeyValueType extends DsigBase
     /**
      * @return null|string
      */
-    public function getY() : ?string
+    public function getY()
     {
         return $this->y;
-    }
-
-    /**
-     * Return bool true if y is set
-     *
-     * @return bool
-     */
-    public function isYSet() : bool
-    {
-        return ( null !== $this->y );
     }
 
     /**
      * @param string $y
      * @return static
      */
-    public function setY( string $y ) : static
+    public function setY( string $y ) : self
     {
         $this->y = $y;
         return $this;
@@ -192,26 +148,16 @@ class DSAKeyValueType extends DsigBase
     /**
      * @return null|string
      */
-    public function getJ() : ?string
+    public function getJ()
     {
         return $this->j;
-    }
-
-    /**
-     * Return bool true if j is set
-     *
-     * @return bool
-     */
-    public function isJSet() : bool
-    {
-        return ( null !== $this->j );
     }
 
     /**
      * @param string $j
      * @return static
      */
-    public function setJ( string $j ) : static
+    public function setJ( string $j ) : self
     {
         $this->j = $j;
         return $this;
@@ -220,26 +166,16 @@ class DSAKeyValueType extends DsigBase
     /**
      * @return null|string
      */
-    public function getSeed() : ?string
+    public function getSeed()
     {
         return $this->seed;
-    }
-
-    /**
-     * Return bool true if seed is set
-     *
-     * @return bool
-     */
-    public function isSeedSet() : bool
-    {
-        return ( null !== $this->seed );
     }
 
     /**
      * @param string $seed
      * @return static
      */
-    public function setSeed( string $seed ) : static
+    public function setSeed( string $seed ) : self
     {
         $this->seed = $seed;
         return $this;
@@ -248,26 +184,16 @@ class DSAKeyValueType extends DsigBase
     /**
      * @return null|string
      */
-    public function getPgenCounter() : ?string
+    public function getPgenCounter()
     {
         return $this->pgenCounter;
-    }
-
-    /**
-     * Return bool true if pgenCounter is set
-     *
-     * @return bool
-     */
-    public function isPgenCounterSet() : bool
-    {
-        return ( null !== $this->pgenCounter );
     }
 
     /**
      * @param string $pgenCounter
      * @return static
      */
-    public function setPgenCounter( string $pgenCounter ) : static
+    public function setPgenCounter( string $pgenCounter ) : self
     {
         $this->pgenCounter = $pgenCounter;
         return $this;

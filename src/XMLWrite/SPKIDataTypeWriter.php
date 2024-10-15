@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,7 +29,7 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLWrite;
 
-use Kigkonsult\DsigSdk\Dto\SPKIData;
+use Kigkonsult\DsigSdk\Dto\SPKIDataType;
 
 /**
  * Class SPKIDataTypeWriter
@@ -38,30 +38,31 @@ class SPKIDataTypeWriter extends DsigWriterBase
 {
     /**
      * Write
-     * @param SPKIData $subject
+     * @param SPKIDataType $SPKIDataType
      *
      */
-    public function write( SPKIData $subject ) : void
+    public function write( SPKIDataType $SPKIDataType )
     {
-        $XMLattributes = self::obtainXMLattributes( $subject );
-        $this->setWriterStartElement( self::SPKIDATA, $XMLattributes );
+        $XMLattributes = $SPKIDataType->getXMLattributes();
+        parent::setWriterStartElement( $this->writer, self::SPKIDATA, $XMLattributes );
 
-        if( $subject->isSPKIDataTypeSet()) {
-            foreach( $subject->getSPKIDataType() as $elementSet ) {
-                foreach( $elementSet as $key => $value ) {
-                    switch( $key ) {
-                        case self::SPKISEXP :
-                            $this->writeTextElement( self::SPKISEXP, $XMLattributes, $value );
-                            break;
-                        case self::ANY : // fall through
-                        case self::ANYTYPE :
-                            AnyTypeWriter::factory( $this->writer )->write( $value );
-                            break;
-                    } // end switch
-                } // end foreach
+        foreach( $SPKIDataType->getSPKIDataType() as $elementSet ) {
+            foreach( $elementSet as $key => $value ) {
+                switch( $key ) {
+                    case self::SPKISEXP :
+                        parent::writeTextElement(
+                            $this->writer,
+                            self::SPKISEXP,
+                            $XMLattributes,
+                            $value
+                        );
+                        break;
+                    case self::ANYTYPE :
+                        AnyTypeWriter::factory( $this->writer )->write( $value );
+                        break;
+                } // end switch
             } // end foreach
-        } // end if
-
+        }
         $this->writer->endElement();
     }
 }

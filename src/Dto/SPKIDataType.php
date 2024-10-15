@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -44,24 +44,11 @@ class SPKIDataType extends DsigBase
     /**
      * @var array
      *
-     * each element is a keyed pair of SPKISexp / Any (opt)
+     * each element is a keyed pair of SPKISexp/AnyType
      *         [ self::SPKISEXP => "base64Binary" ]
-     *         [ self::ANYTYPE  => Any ]
+     *         [ self::ANYTYPE  => AnyType ]
      */
-    private array $SPKIDataType = [];
-
-    /**
-     * Factory method with type and SPKIDataType
-     *
-     * @param string $type
-     * @param mixed $SPKIDataType
-     * @return static
-     * @throws InvalidArgumentException
-     */
-    public static function factorySPKIDataType( string $type, mixed $SPKIDataType ) : static
-    {
-        return self::factory()->addSPKIDataType( $type, $SPKIDataType );
-    }
+    protected $SPKIDataType = [];
 
     /**
      * @return array
@@ -72,31 +59,19 @@ class SPKIDataType extends DsigBase
     }
 
     /**
-     * Return bool true if SPKIDataType is not empty
-     *
-     * @return bool
-     */
-    public function isSPKIDataTypeSet() : bool
-    {
-        return ! empty( $this->SPKIDataType );
-    }
-
-    /**
      * @param string $type
      * @param mixed  $SPKIData
      * @return static
      * @throws InvalidArgumentException
      */
-    public function addSPKIDataType( string $type, mixed $SPKIData ) : static
+    public function addSPKIDataType( string $type, $SPKIData ) : self
     {
         switch( $type ) {
             case self::SPKISEXP :
                 Assert::string( $SPKIData );
                 break;
-            case  self::ANY :
-                $type = self::ANYTYPE; // fall through
             case self::ANYTYPE :
-                Assert::isInstanceOf( $SPKIData, Any::class );
+                Assert::isInstanceOf( $SPKIData, AnyType::class );
                 break;
             default :
                 throw new InvalidArgumentException(
@@ -112,7 +87,7 @@ class SPKIDataType extends DsigBase
      * @return static
      * @throws InvalidArgumentException
      */
-    public function setSPKIDataType( array $SPKIData ) : static
+    public function setSPKIDataType( array $SPKIData ) : self
     {
         foreach( $SPKIData as $ix1 => $elementSet ) {
             if( ! is_array( $elementSet )) {

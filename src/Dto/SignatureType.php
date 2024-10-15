@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,10 +29,8 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\Dto;
 
-use Kigkonsult\DsigSdk\Dto\Traits\IdTrait;
-
 /**
- * Class SignatureType
+ * Class Signature
  *
  * schemaLocation="http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd"
  * namespace="http://www.w3.org/2000/09/xmldsig#"
@@ -40,119 +38,90 @@ use Kigkonsult\DsigSdk\Dto\Traits\IdTrait;
 class SignatureType extends DsigBase
 {
     /**
-     * @var SignedInfo|null
+     * @var SignedInfoType
      */
-    protected ?SignedInfo $signedInfo = null;
+    protected $signedInfo = null;
 
     /**
-     * @var SignatureValue|null
+     * @var SignatureValueType
      */
-    protected ?SignatureValue $signatureValue = null;
+    protected $signatureValue = null;
 
     /**
-     * @var KeyInfo|null
+     * @var KeyInfoType
      *                  minOccurs="0"
      */
-    protected ?KeyInfo $keyInfo = null;
+    protected $keyInfo = null;
 
     /**
-     * @var Objekt[]
+     * @var ObjectType[]
      *           minOccurs="0" maxOccurs="unbounded"
      */
-    protected array $object = [];
+    protected $object = [];
 
     /**
      * Property, get- and setter methods for
      * var string id
      *            attribute name="Id" type="ID" use="optional"
      */
-    use IdTrait;
+    use Traits\IdTrait;
 
     /**
-     * @return null|SignedInfo
+     * @return null|SignedInfoType
      */
-    public function getSignedInfo() : ?SignedInfo
+    public function getSignedInfo()
     {
         return $this->signedInfo;
     }
 
     /**
-     * Return bool true if signedInfo is set
-     *
-     * @return bool
-     */
-    public function isSignedInfoSet() : bool
-    {
-        return ( null !== $this->signedInfo );
-    }
-    /**
-     * @param SignedInfo $signedInfo
+     * @param SignedInfoType $signedInfo
      * @return static
      */
-    public function setSignedInfo( SignedInfo $signedInfo ) : static
+    public function setSignedInfo( SignedInfoType $signedInfo ) : self
     {
         $this->signedInfo = $signedInfo;
         return $this;
     }
 
     /**
-     * @return null|SignatureValue
+     * @return null|SignatureValueType
      */
-    public function getSignatureValue() : ?SignatureValue
+    public function getSignatureValue()
     {
         return $this->signatureValue;
     }
 
     /**
-     * Return bool true if signatureValue is set
-     *
-     * @return bool
-     */
-    public function isSignatureValueSet() : bool
-    {
-        return ( null !== $this->signatureValue );
-    }
-
-    /**
-     * @param SignatureValue $signatureValue
+     * @param SignatureValueType $signatureValue
      * @return static
      */
-    public function setSignatureValue( SignatureValue $signatureValue ) : static
+    public function setSignatureValue( SignatureValueType $signatureValue ) : self
     {
         $this->signatureValue = $signatureValue;
         return $this;
     }
 
     /**
-     * @return null|KeyInfo
+     * @return null|KeyInfoType
      */
-    public function getKeyInfo() : ?KeyInfo
+    public function getKeyInfo()
     {
         return $this->keyInfo;
     }
 
     /**
-     * Return bool true if keyInfo is set
-     *
-     * @return bool
-     */
-    public function isKeyInfoSet() : bool
-    {
-        return ( null !== $this->keyInfo );
-    }
-
-    /**
-     * @param KeyInfo $keyInfo
+     * @param KeyInfoType $keyInfo
      * @return static
      */
-    public function setKeyInfo( KeyInfo $keyInfo ) : static
+    public function setKeyInfo( KeyInfoType $keyInfo ) : self
     {
         $this->keyInfo = $keyInfo;
         return $this;
     }
 
     /**
-     * @return Objekt[]
+     * @return ObjectType[]
      */
     public function getObject() : array
     {
@@ -160,30 +129,20 @@ class SignatureType extends DsigBase
     }
 
     /**
-     * Return bool true if object is not empty
-     *
-     * @return bool
-     */
-    public function isObjectSet() : bool
-    {
-        return ! empty( $this->object );
-    }
-
-    /**
-     * @param Objekt $object
+     * @param ObjectType $object
      * @return static
      */
-    public function addObject( Objekt $object ) : static
+    public function addObject( ObjectType $object ) : self
     {
         $this->object[] = $object;
         return $this;
     }
 
     /**
-     * @param Objekt[] $object
+     * @param ObjectType[] $object
      * @return static
      */
-    public function setObject( array $object ) : static
+    public function setObject( array $object ) : self
     {
         foreach( $object as $objectType ) {
             $this->addObject( $objectType );

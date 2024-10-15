@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -34,35 +34,26 @@ use InvalidArgumentException;
 trait IdTrait
 {
     /**
-     * @var null|string
+     * @var string
      *          type="ID"
      */
-    protected ?string $id = null;
+    protected $id = null;
 
 
     /**
      * @return null|string
      */
-    public function getId() : ?string
+    public function getId()
     {
         return $this->id;
     }
 
     /**
-     * Return bool true if id is set
-     *
-     * @return bool
-     */
-    public function isIdSet() : bool
-    {
-        return ( null !== $this->id );
-    }
-    /**
      * @param string $id
      * @return static
      * @throws InvalidArgumentException
      */
-    public function setId( string $id ) : static
+    public function setId( string $id ) : self
     {
         $this->id = $id;
         return $this;

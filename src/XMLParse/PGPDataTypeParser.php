@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,10 +29,10 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLParse;
 
-use Kigkonsult\DsigSdk\Dto\PGPData;
+use Kigkonsult\DsigSdk\Dto\PGPDataType;
 use XMLReader;
 
-use function in_array;
+use function sprintf;
 
 /**
  * Class PGPDataTypeParser
@@ -42,71 +42,62 @@ class PGPDataTypeParser extends DsigParserBase
     /**
      * Parse
      *
-     * @return PGPData
+     * @return PGPDataType
      */
-    public function parse() : PGPData
+    public function parse() :PGPDataType
     {
-        $PGPData = PGPData::factory()->setXMLattributes( $this->reader );
-        $this->logDebug1( __METHOD__ );
-        if( $this->reader->hasAttributes ) {
-            $this->processNodeAttributes( $PGPData );
+        $PGPDataType  = PGPDataType::factory()->setXMLattributes( $this->reader );
+        $this->logger->debug(
+            sprintf( self::$FMTnodeFound, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+        );
+        if( $this->reader->isEmptyElement ) {
+            return $PGPDataType;
         }
-        if( ! $this->reader->isEmptyElement ) {
-            $this->processSubNodes( $PGPData );
-        }
-        $this->logDebug4( __METHOD__ );
-        return $PGPData;
-    }
-
-    /**
-     * @param PGPData $PGPData
-     */
-    private function processNodeAttributes( PGPData $PGPData ) : void
-    {
-        while( $this->reader->moveToNextAttribute()) {
-            $this->logDebug2( __METHOD__ );
-            if( PGPData::isXmlAttrKey( $this->reader->localName )) {
-                $PGPData->setXMLattribute( $this->reader->localName, $this->reader->value );
-            }
-        } // end while
-        $this->reader->moveToElement();
-    }
-
-    /**
-     * @param PGPData $PGPData
-     */
-    private function processSubNodes( PGPData $PGPData ) : void
-    {
-        static $KEYs    = [ self::PGPKEYID, self::PGPKEYPACKET ];
         $headElement    = $this->reader->localName;
         $currentElement = null;
+        $anyTypes       = [];
         while( @$this->reader->read()) {
-            $this->logDebug3( __METHOD__ );
+            if( XMLReader::SIGNIFICANT_WHITESPACE != $this->reader->nodeType ) {
+                $this->logger->debug(
+                    sprintf( self::$FMTreadNode, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+                );
+            }
             switch( true ) {
-                case ( XMLReader::END_ELEMENT === $this->reader->nodeType ) :
-                    if( $headElement === $this->reader->localName ) {
+                case ( XMLReader::END_ELEMENT == $this->reader->nodeType ) :
+                    if( $headElement == $this->reader->localName ) {
                         break 2;
                     }
                     $currentElement = null;
                     break;
-                case ( $this->isNonEmptyTextNode( $this->reader->nodeType ) && ! empty( $currentElement )) :
-                    if( self::PGPKEYID === $currentElement ) {
-                        $PGPData->setPGPKeyID( $this->reader->value );
-                    }
-                    elseif( self::PGPKEYPACKET === $currentElement ) {
-                        $PGPData->setPGPKeyPacket( $this->reader->value );
+                case ( XMLReader::TEXT == $this->reader->nodeType ) :
+                    switch( true ) {
+                        case( empty( $currentElement )) :
+                            break;
+                        case( ! $this->reader->hasValue ) :
+                            break;
+                        case ( self::PGPKEYID == $currentElement ) :
+                            $PGPDataType->setPGPKeyID( $this->reader->value );
+                            break;
+                        case ( self::PGPKEYPACKET == $currentElement ) :
+                            $PGPDataType->setPGPKeyPacket( $this->reader->value );
+                            break;
                     }
                     break;
-                case ( XMLReader::ELEMENT !== $this->reader->nodeType ) :
+                case ( XMLReader::ELEMENT != $this->reader->nodeType ) :
                     break;
-                case in_array( $this->reader->localName, $KEYs, true ) :
+                case ( self::PGPKEYID == $this->reader->localName ) :
+                    $currentElement = $this->reader->localName;
+                    break;
+                case ( self::PGPKEYPACKET == $this->reader->localName ) :
                     $currentElement = $this->reader->localName;
                     break;
                 default :
-                    $PGPData->addAny( AnyTypeParser::factory( $this->reader )->parse());
+                    $anyTypes[] = AnyTypeParser::factory( $this->reader )->parse();
                     $currentElement = null;
                     break;
             } // end switch
         } // end while
+        $PGPDataType->setAny( $anyTypes );
+        return $PGPDataType;
     }
 }

@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,28 +29,27 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\DsigLoader;
 
-use Exception;
-use Kigkonsult\DsigSdk\Dto\Signature as Dto;
-// use Faker;
+use Kigkonsult\DsigSdk\Dto\DigestMethodType as Dto;
+use Faker;
 
-/**
- * Class Signature
- *
- * schemaLocation="http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd"
- * namespace="http://www.w3.org/2000/09/xmldsig#"
- */
-class Signature2
+class DigestMethodType implements DsigLoaderInterface
 {
     /**
      * @return Dto
-     * @throws Exception
+     * @access static
      */
     public static function loadFromFaker() : Dto
     {
-        // $faker = Faker\Factory::create();
+        $faker = Faker\Factory::create();
+
+        $max = $faker->numberBetween( 1, 2 );
+        $anys = [];
+        for( $x = 0; $x <= $max; $x++ ) {
+            $anys[] = AnyType::loadFromFaker();
+        }
 
         return Dto::factory()
-                  ->setSignedInfo( SignedInfo::loadFromFaker())
-                  ->setSignatureValue( SignatureValue::loadFromFaker());
+                  ->setAny( $anys )
+                  ->setAlgorithm( self::ALGORITHMS[mt_rand( 0, count( self::ALGORITHMS ) - 1 )] );
     }
 }

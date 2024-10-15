@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -35,44 +35,19 @@ namespace Kigkonsult\DsigSdk;
 interface XMLAttributesInterface
 {
     /**
-     * const XML schema element attributes
+     * const  XML root element attributes
      */
-    public const TARGETNAMESPACE    = 'targetNamespace';
-    public const XSI_SCHEMALOCATION = 'xsi:schemaLocation';
-    public const XMLNS              = 'xmlns';
-    public const XMLNS_XSD          = 'xmlns:xsd';
-    public const XMLNS_XSI          = 'xmlns:xsi';
+    const XMLNS_XSI          = 'xmlns:xsi';
+    const XMLNS_XSD          = 'xmlns:xsd';
+    const XSI_SCHEMALOCATION = 'xsi:schemaLocation';
+    const XMLNS              = 'xmlns';
 
     /**
-     * const XML Schema keys
+     * const XMLreader element node properties
      */
-    public const XMLSchemaKeys = [ self::XMLNS, self::XMLNS_XSI, self::XMLNS_XSD, self::XSI_SCHEMALOCATION ];
-
-    /**
-     * const dsig XML Schema URis
-     */
-    public const DSIGURI            = "http://www.w3.org/2000/09/xmldsig#";
-
-    /**
-     * const XML Schema URis
-     */
-    public const XMLSCHEMA          = "http://www.w3.org/2001/XMLSchema";
-
-    /**
-     * dsig XML schema (default) attributes
-     *
-     * @var string[]
-     */
-    public const DSIGXMLAttributes  = [
-        self::XMLNS              => self::DSIGURI,
-    ];
-
-    /**
-     * const (XMLreader, local) element node properties
-     */
-    public const BASEURI            = 'baseURI';      // The base URI of the node
-    public const LOCALNAME          = 'localName';    // The local name of the node
-    public const NAME               = 'name';         // The qualified name of the node
-    public const NAMESPACEURI       = 'namespaceURI'; // The URI of the namespace associated with the node
-    public const PREFIX             = 'prefix';       // The prefix of the namespace associated with the node
+    const BASEURI            = 'baseURI';      // The base URI of the node
+    const LOCALNAME          = 'localName';    // The local name of the node
+    const NAME               = 'name';         // The qualified name of the node
+    const NAMESPACEURI       = 'namespaceURI'; // The URI of the namespace associated with the node
+    const PREFIX             = 'prefix';       // The prefix of the namespace associated with the node
 }

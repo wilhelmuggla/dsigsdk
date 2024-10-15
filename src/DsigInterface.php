@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -38,62 +38,61 @@ interface DsigInterface
     /**
      * xmldsig element constants
      */
-    public const ANY                    = 'Any';
-    public const ANYTYPE                = 'AnyType';
-    public const CANONICALIZATIONMETHOD = 'CanonicalizationMethod';
-    public const DSAKEYVALUE            = 'DSAKeyValue';
-    public const EXPONENT               = 'Exponent';
-    public const DIGESTMETHOD           = 'DigestMethod';
-    public const DIGESTVALUE            = 'DigestValue';
-    public const G                      = 'G';
-    public const HMACOUTPUTLENGTH       = 'HMACOutputLength';
-    public const J                      = 'J';
-    public const KEYINFO                = 'KeyInfo';
-    public const KEYNAME                = 'KeyName';
-    public const KEYVALUE               = 'KeyValue';
-    public const MANIFEST               = 'Manifest';
-    public const MGMTDATA               = 'MgmtData';
-    public const MODULUS                = 'Modulus';
-    public const OBJECT                 = 'Objekt';
-    public const P                      = 'P';
-    public const PGENCOUNTER            = 'PgenCounter';
-    public const PGPDATA                = 'PGPData';
-    public const PGPKEYID               = 'PGPKeyID';
-    public const PGPKEYPACKET           = 'PGPKeyPacket';
-    public const Q                      = 'Q';
-    public const REFERENS               = 'Reference';
-    public const RETRIEVALMETHOD        = 'RetrievalMethod';
-    public const RSAKEYVALUE            = 'RSAKeyValue';
-    public const SEED                   = 'Seed';
-    public const SIGNATURE              = 'Signature';
-    public const SIGNATUREMETHOD        = 'SignatureMethod';
-    public const SIGNATUREVALUE         = 'SignatureValue';
-    public const SIGNATUREPROPERTIES    = 'SignatureProperties';
-    public const SIGNATUREPROPERTY      = 'SignatureProperty';
-    public const SIGNEDINFO             = 'SignedInfo';
-    public const SPKIDATA               = 'SPKIData';
-    public const SPKISEXP               = 'SPKISexp';
-    public const TRANSFORM              = 'Transform';
-    public const TRANSFORMS             = 'Transforms';
-    public const X509CERTIFICATE        = 'X509Certificate';
-    public const X509CRL                = 'X509CRL';
-    public const X509DATA               = 'X509Data';
-    public const X509ISSUERNAME         = 'X509IssuerName';
-    public const X509SERIALNUMBER       = 'X509SerialNumber';
-    public const X509ISSUERSERIAL       = 'X509IssuerSerial';
-    public const X509SKI                = 'X509SKI';
-    public const X509SUBJECTNAME        = 'X509SubjectName';
-    public const XPATH                  = 'XPath';
-    public const Y                      = 'Y';
+    const ANYTYPE                = 'AnyType';
+    const CANONICALIZATIONMETHOD = 'CanonicalizationMethod';
+    const DSAKEYVALUE            = 'DSAKeyValue';
+    const EXPONENT               = 'Exponent';
+    const DIGESTMETHOD           = 'DigestMethod';
+    const DIGESTVALUE            = 'DigestValue';
+    const G                      = 'G';
+    const HMACOUTPUTLENGTH       = 'HMACOutputLength';
+    const J                      = 'J';
+    const KEYINFO                = 'KeyInfo';
+    const KEYNAME                = 'KeyName';
+    const KEYVALUE               = 'KeyValue';
+    const MANIFEST               = 'Manifest';
+    const MGMTDATA               = 'MgmtData';
+    const MODULUS                = 'Modulus';
+    const OBJECT                 = 'Objekt';
+    const P                      = 'P';
+    const PGENCOUNTER            = 'PgenCounter';
+    const PGPDATA                = 'PGPData';
+    const PGPKEYID               = 'PGPKeyID';
+    const PGPKEYPACKET           = 'PGPKeyPacket';
+    const Q                      = 'Q';
+    const REFERENS               = 'Reference';
+    const RETRIEVALMETHOD        = 'RetrievalMethod';
+    const RSAKEYVALUE            = 'RSAKeyValue';
+    const SEED                   = 'Seed';
+    const SIGNATURE              = 'Signature';
+    const SIGNATUREMETHOD        = 'SignatureMethod';
+    const SIGNATUREVALUE         = 'SignatureValue';
+    const SIGNATUREPROPERTIES    = 'SignatureProperties';
+    const SIGNATUREPROPERTY      = 'SignatureProperty';
+    const SIGNEDINFO             = 'SignedInfo';
+    const SPKIDATA               = 'SPKIData';
+    const SPKISEXP               = 'SPKISexp';
+    const TRANSFORM              = 'Transform';
+    const TRANSFORMS             = 'Transforms';
+    const X509CERTIFICATE        = 'X509Certificate';
+    const X509CRL                = 'X509CRL';
+    const X509DATA               = 'X509Data';
+    const X509ISSUERNAME         = 'X509IssuerName';
+    const X509SERIALNUBER        = 'X509SerialNumber';
+    const X509ISSUERSERIAL       = 'X509IssuerSerial';
+    const X509SKI                = 'X509SKI';
+    const X509SUBJECTNAME        = 'X509SubjectName';
+    const XPATH                  = 'XPath';
+    const Y                      = 'Y';
 
     /**
      * xmldsig attribute constants
      */
-    public const ALGORITM               = 'Algorithm';
-    public const ENCODING               = 'Encoding';
-    public const ID                     = 'Id';
-    public const MIMETYPE               = 'MimeType';
-    public const TARGET                 = 'Target';
-    public const TYPE                   = 'Type';
-    public const URI                    = 'URI';
+    const ALGORITM               = 'Algorithm';
+    const ENCODING               = 'Encoding';
+    const ID                     = 'Id';
+    const MIMETYPE               = 'MimeType';
+    const TARGET                 = 'Target';
+    const TYPE                   = 'Type';
+    const URI                    = 'URI';
 }

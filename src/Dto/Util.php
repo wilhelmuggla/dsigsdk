@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,13 +29,11 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\Dto;
 
-use Exception;
 use InvalidArgumentException;
 
 use function bin2hex;
 use function floor;
-use function in_array;
-use function random_bytes;
+use function openssl_random_pseudo_bytes;
 use function sprintf;
 use function strpos;
 use function strrpos;
@@ -47,18 +45,36 @@ use function substr;
 class Util
 {
     /**
+     * Return cryptographically strong arg byteCnt bytes - uses openssl_random_pseudo_bytes
+     *
+     * @param int $byteCnt
+     * @param bool $cStrong
+     * @return string
+     */
+    public static function getRandomPseudoBytes( int $byteCnt, & $cStrong = false ) : string
+    {
+        static $MAX = 10;
+        $cnt = 0;
+        do {
+            $bytes = openssl_random_pseudo_bytes( $byteCnt, $cStrong );
+            $cnt += 1;
+        } while(( $MAX > $cnt ) && ( false === $cStrong ));
+        return $bytes;
+    }
+
+    /**
      * Return (hex) cryptographically strong salt, default 64 bytes
      *
-     * @param null|int $byteCnt
+     * @param int $byteCnt
      * @return string
-     * @throws Exception
      */
-    public static function getSalt( ? int $byteCnt = null ) : string
+    public static function getSalt( $byteCnt = null ) : string
     {
-        if( $byteCnt === null ) {
+        if( empty( $byteCnt )) {
             $byteCnt = 64;
         }
-        return bin2hex( random_bytes( (int) floor( $byteCnt / 2 )));
+        $byteCnt2 = (int) floor( $byteCnt / 2 );
+        return bin2hex( self::getRandomPseudoBytes( $byteCnt2 ));
     }
 
     /**
@@ -75,10 +91,10 @@ class Util
         static $HS    = [ '#', '/' ];
         static $WC    = '#WithComments';
         static $FMT   = 'Algorithm not found in \'%s\'';
-        if( in_array( substr( $identifier, -1 ), $HS, true ))  {
+        if( in_array( substr( $identifier, -1 ), $HS ))  {
             $identifier = substr( $identifier, 0, -1 );
         }
-        if(( $WC === substr( $identifier, -13 )) &&
+        if(( $WC == substr( $identifier, -13 )) &&
             ( false !== ( $pos = strrpos( $identifier, $SLASH )))) {
             return substr( $identifier, ( $pos + 1 ));
         }

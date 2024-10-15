@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,7 +29,7 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLWrite;
 
-use Kigkonsult\DsigSdk\Dto\Transform;
+use Kigkonsult\DsigSdk\Dto\TransformType;
 
 /**
  * Class TransformTypeWriter
@@ -38,32 +38,33 @@ class TransformTypeWriter extends DsigWriterBase
 {
     /**
      * Write
-     * @param Transform $subject
+     * @param TransformType $transformType
      *
      */
-    public function write( Transform $subject ) : void
+    public function write( TransformType $transformType )
     {
-        $XMLattributes = self::obtainXMLattributes( $subject );
-        $this->setWriterStartElement( self::TRANSFORM, $XMLattributes );
+        $XMLattributes = $transformType->getXMLattributes();
+        parent::setWriterStartElement( $this->writer, self::TRANSFORM, $XMLattributes );
 
-        if( $subject->isAlgorithmSet()) {
-            $this->writeAttribute( self::ALGORITM, $subject->getAlgorithm());
-        }
-        if( $subject->isTransformTypesSet()) {
-            foreach( $subject->getTransformTypes() as $element ) {
-                foreach( $element as $key => $value ) {
-                    switch( $key ) {
-                        case self::XPATH :
-                            $this->writeTextElement( self::XPATH, $XMLattributes, $value );
-                            break;
-                        case self::ANY : // fall through
-                        case self::ANYTYPE :
-                            AnyTypeWriter::factory( $this->writer )->write( $value );
-                            break;
-                    } // end switch
-                } // end foreach
+        parent::writeAttribute( $this->writer, self::ALGORITM, $transformType->getAlgorithm());
+
+        foreach( $transformType->getTransformTypes() as $element ) {
+            foreach( $element as $key => $value ) {
+                switch( $key ) {
+                    case self::XPATH :
+                        parent::writeTextElement(
+                            $this->writer,
+                            self::XPATH,
+                            $XMLattributes,
+                            $value
+                        );
+                        break;
+                    case self::ANYTYPE :
+                        AnyTypeWriter::factory( $this->writer )->write( $value );
+                        break;
+                } // end switch
             } // end foreach
-        } // end if
+        } // end foreach
 
         $this->writer->endElement();
     }

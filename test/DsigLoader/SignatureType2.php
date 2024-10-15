@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,32 +29,27 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\DsigLoader;
 
-use Exception;
-use Kigkonsult\DsigSdk\DsigInterface;
-use Kigkonsult\DsigSdk\Dto\Transform as Dto;
-use Faker;
+use Kigkonsult\DsigSdk\Dto\SignatureType as Dto;
+// use Faker;
 
-class Transform implements DsigInterface, DsigLoaderInterface
+/**
+ * Class Signature
+ *
+ * schemaLocation="http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd"
+ * namespace="http://www.w3.org/2000/09/xmldsig#"
+ */
+class SignatureType2
 {
     /**
      * @return Dto
-     * @throws Exception
+     * @access static
      */
     public static function loadFromFaker() : Dto
     {
-        $faker = Faker\Factory::create();
+        // $faker = Faker\Factory::create();
 
-        $max = random_int( 2, 3 );
-        $transformTypes = [];
-        for( $x = 0; $x <= $max; $x++ ) {
-            if( 1 === random_int( 1, 2 )) {
-                $transformTypes[] = [ self::XPATH => $faker->word ];
-            }
-            else {
-                $transformTypes[] = [ self::ANYTYPE => Any::loadFromFaker() ];
-            }
-        } // end for
-        return Dto::factoryAlgorithm( self::ALGORITHMS[random_int( 0, count( self::ALGORITHMS ) - 1 )] )
-            ->setTransformTypes( $transformTypes );
+        return Dto::factory()
+                  ->setSignedInfo( SignedInfoType::loadFromFaker())
+                  ->setSignatureValue( SignatureValueType::loadFromFaker());
     }
 }

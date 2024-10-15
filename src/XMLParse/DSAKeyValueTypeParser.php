@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,10 +29,10 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLParse;
 
-use Kigkonsult\DsigSdk\Dto\DSAKeyValue;
+use Kigkonsult\DsigSdk\Dto\DSAKeyValueType;
 use XMLReader;
 
-use function in_array;
+use function sprintf;
 
 /**
  * Class DSAKeyValueTypeParser
@@ -40,97 +40,82 @@ use function in_array;
 class DSAKeyValueTypeParser extends DsigParserBase
 {
     /**
-     * @var string[]
-     */
-    private static array $DtoProps = [
-        self::P,
-        self::Q,
-        self::G,
-        self::Y,
-        self::J,
-        self::SEED,
-        self::PGENCOUNTER
-    ];
-
-    /**
      * Parse
      *
-     * @return DSAKeyValue
+     * @return DSAKeyValueType
      */
-    public function parse() : DSAKeyValue
+    public function parse() :DSAKeyValueType
     {
-        $DSAKeyValue = DSAKeyValue::factory()->setXMLattributes( $this->reader );
-        $this->logDebug1( __METHOD__ );
-        if( $this->reader->hasAttributes ) {
-            $this->processNodeAttributes( $DSAKeyValue );
+        $DSAKeyValueType = DSAKeyValueType::factory()->setXMLattributes( $this->reader );
+        $this->logger->debug(
+            sprintf( self::$FMTnodeFound, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+        );
+        if( $this->reader->isEmptyElement ) {
+            return $DSAKeyValueType;
         }
-        if( ! $this->reader->isEmptyElement ) {
-            $this->processSubNodes( $DSAKeyValue );
-        }
-        $this->logDebug4( __METHOD__ );
-        return $DSAKeyValue;
-    }
-
-    /**
-     * @param DSAKeyValue $DSAKeyValue
-     */
-    private function processNodeAttributes( DSAKeyValue $DSAKeyValue ) : void
-    {
-        while( $this->reader->moveToNextAttribute()) {
-            $this->logDebug2( __METHOD__ );
-            if( DSAKeyValue::isXmlAttrKey( $this->reader->localName )) {
-                $DSAKeyValue->setXMLattribute( $this->reader->localName, $this->reader->value );
-            }
-        } // end while
-        $this->reader->moveToElement();
-    }
-
-    /**
-     * @param DSAKeyValue $DSAKeyValue
-     */
-    protected function processSubNodes( DSAKeyValue $DSAKeyValue ) : void
-    {
         $headElement    = $this->reader->localName;
         $currentElement = null;
         while( @$this->reader->read()) {
-            $this->logDebug3( __METHOD__ );
+            if( XMLReader::SIGNIFICANT_WHITESPACE != $this->reader->nodeType ) {
+                $this->logger->debug(
+                    sprintf( self::$FMTreadNode, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+                );
+            }
             switch( true ) {
-                case ( XMLReader::END_ELEMENT === $this->reader->nodeType ) :
-                    if( $headElement === $this->reader->localName ) {
+                case ( XMLReader::END_ELEMENT == $this->reader->nodeType ) :
+                    if( $headElement == $this->reader->localName ) {
                         break 2;
                     }
                     $currentElement = null;
                     break;
-                case ( $this->isNonEmptyTextNode( $this->reader->nodeType ) && ! empty( $currentElement )) :
-                    switch( $currentElement ) {
-                        case ( self::P ) :
-                            $DSAKeyValue->setP( $this->reader->value );
-                            break;
-                        case ( self::Q  ) :
-                            $DSAKeyValue->setQ( $this->reader->value );
-                            break;
-                        case ( self::G  ) :
-                            $DSAKeyValue->setG( $this->reader->value );
-                            break;
-                        case ( self::Y ) :
-                            $DSAKeyValue->setY( $this->reader->value );
-                            break;
-                        case ( self::J ) :
-                            $DSAKeyValue->setJ( $this->reader->value );
-                            break;
-                        case ( self::SEED ) :
-                            $DSAKeyValue->setSeed( $this->reader->value );
-                            break;
-                        case ( self::PGENCOUNTER ) :
-                            $DSAKeyValue->setPgenCounter( $this->reader->value );
-                            break;
-                    } // end switch
+                case (( XMLReader::TEXT == $this->reader->nodeType ) && ! $this->reader->hasValue ) :
                     break;
-                case (( XMLReader::ELEMENT === $this->reader->nodeType ) &&
-                    in_array( $this->reader->localName, self::$DtoProps, true )) :
+                case (( XMLReader::TEXT == $this->reader->nodeType ) && ( self::P == $currentElement )) :
+                    $DSAKeyValueType->setP( $this->reader->value );
+                    break;
+                case (( XMLReader::TEXT == $this->reader->nodeType ) && ( self::Q == $currentElement )) :
+                    $DSAKeyValueType->setQ( $this->reader->value );
+                    break;
+                case (( XMLReader::TEXT == $this->reader->nodeType ) && ( self::G == $currentElement )) :
+                    $DSAKeyValueType->setG( $this->reader->value );
+                    break;
+                case (( XMLReader::TEXT == $this->reader->nodeType ) && ( self::Y == $currentElement )) :
+                    $DSAKeyValueType->setY( $this->reader->value );
+                    break;
+                case (( XMLReader::TEXT == $this->reader->nodeType ) && ( self::J == $currentElement )) :
+                    $DSAKeyValueType->setJ( $this->reader->value );
+                    break;
+                case (( XMLReader::TEXT == $this->reader->nodeType ) && ( self::SEED == $currentElement )) :
+                    $DSAKeyValueType->setSeed( $this->reader->value );
+                    break;
+                case (( XMLReader::TEXT == $this->reader->nodeType ) && ( self::PGENCOUNTER == $currentElement )) :
+                    $DSAKeyValueType->setPgenCounter( $this->reader->value );
+                    break;
+                case ( XMLReader::ELEMENT != $this->reader->nodeType ) :
+                    break;
+                case ( self::P == $this->reader->localName ) :
+                    $currentElement = $this->reader->localName;
+                    break;
+                case ( self::Q == $this->reader->localName ) :
+                    $currentElement = $this->reader->localName;
+                    break;
+                case ( self::G == $this->reader->localName ) :
+                    $currentElement = $this->reader->localName;
+                    break;
+                case ( self::Y == $this->reader->localName ) :
+                    $currentElement = $this->reader->localName;
+                    break;
+                case ( self::J == $this->reader->localName ) :
+                    $currentElement = $this->reader->localName;
+                    break;
+                case ( self::SEED == $this->reader->localName ) :
+                    $currentElement = $this->reader->localName;
+                    break;
+                case ( self::PGENCOUNTER == $this->reader->localName ) :
                     $currentElement = $this->reader->localName;
                     break;
             } // end switch
         } // end while
+        return $DSAKeyValueType;
     }
 }

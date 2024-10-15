@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,7 +29,7 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLWrite;
 
-use Kigkonsult\DsigSdk\Dto\DigestMethod;
+use Kigkonsult\DsigSdk\Dto\DigestMethodType;
 
 /**
  * Class DigestMethodTypeWriter
@@ -38,21 +38,18 @@ class DigestMethodTypeWriter extends DsigWriterBase
 {
     /**
      * Write
-     * @param DigestMethod $subject
+     * @param DigestMethodType $digestMethodType
      *
      */
-    public function write( DigestMethod $subject ) : void
-    {
-        $this->setWriterStartElement( self::DIGESTMETHOD, self::obtainXMLattributes( $subject ));
+    public function write( DigestMethodType $digestMethodType ) {
+        parent::setWriterStartElement(
+            $this->writer, self::DIGESTMETHOD, $digestMethodType->getXMLattributes()
+        );
 
-        if( $subject->isAlgorithmSet()) {
-            $this->writeAttribute( self::ALGORITM, $subject->getAlgorithm() );
-        }
+        parent::writeAttribute( $this->writer, self::ALGORITM, $digestMethodType->getAlgorithm());
 
-        if( $subject->isAnySet()) {
-            foreach( $subject->getAny() as $any ) {
-                AnyTypeWriter::factory( $this->writer )->write( $any );
-            }
+        foreach( $digestMethodType->getAny() as $any) {
+            AnyTypeWriter::factory( $this->writer )->write( $any );
         }
 
         $this->writer->endElement();

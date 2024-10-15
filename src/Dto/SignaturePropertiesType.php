@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,8 +29,6 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\Dto;
 
-use Kigkonsult\DsigSdk\Dto\Traits\IdTrait;
-
 /**
  * Class SignaturePropertiesType
  *
@@ -40,31 +38,13 @@ use Kigkonsult\DsigSdk\Dto\Traits\IdTrait;
 class SignaturePropertiesType extends DsigBase
 {
     /**
-     * @var SignatureProperty[]
+     * @var SignaturePropertyType[]
      *                     maxOccurs="unbounded"
      */
-    protected array $signatureProperty = [];
+    protected $signatureProperty = [];
 
     /**
-     * Property, get- and setter methods for
-     * var string id
-     *            attribute name="Id" type="ID" use="optional"
-     */
-    use IdTrait;
-
-    /**
-     * Factory method with one signatureProperty
-     *
-     * @param SignatureProperty $signatureProperty
-     * @return static
-     */
-    public static function factorySignatureProperty( SignatureProperty $signatureProperty ) : static
-    {
-        return self::factory()->addSignatureProperty( $signatureProperty );
-    }
-
-    /**
-     * @return SignatureProperty[]
+     * @return SignaturePropertyType[]
      */
     public function getSignatureProperty() : array
     {
@@ -72,30 +52,20 @@ class SignaturePropertiesType extends DsigBase
     }
 
     /**
-     * Return bool true if signatureProperty is not empty
-     *
-     * @return bool
-     */
-    public function isSignaturePropertySet() : bool
-    {
-        return ! empty( $this->signatureProperty );
-    }
-
-    /**
-     * @param SignatureProperty $signatureProperty
+     * @param SignaturePropertyType $signatureProperty
      * @return static
      */
-    public function addSignatureProperty( SignatureProperty $signatureProperty ) : static
+    public function addSignatureProperty( SignaturePropertyType $signatureProperty ) : self
     {
         $this->signatureProperty[] = $signatureProperty;
         return $this;
     }
 
     /**
-     * @param SignatureProperty[] $signatureProperty
+     * @param SignaturePropertyType[] $signatureProperty
      * @return static
      */
-    public function setSignatureProperty( array $signatureProperty ) : static
+    public function setSignatureProperty( array $signatureProperty ) : self
     {
         foreach( $signatureProperty as $signProp ) {
             $this->addSignatureProperty( $signProp );

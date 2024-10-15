@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -32,7 +32,7 @@ namespace Kigkonsult\DsigSdk\XMLParse;
 use Kigkonsult\DsigSdk\DsigBase;
 use XMLReader;
 
-use function sprintf;
+use function get_called_class;
 
 /**
  * Class DsigParserBase
@@ -40,9 +40,16 @@ use function sprintf;
 abstract class DsigParserBase extends DsigBase
 {
     /**
+     * @var string
+     */
+    protected static $FMTnodeFound = '%s Found (%s) %s';
+    protected static $FMTattrFound = '%s Found attribute %s = %s';
+    protected static $FMTreadNode  = '%s reading (%s) %s';
+
+    /**
      * @var array $nodeTypes
      */
-    protected static array $nodeTypes = [
+    protected static $nodeTypes = [
         0  => 'NONE',
         1  => 'ELEMENT',
         2  => 'ATTRIBUTE',
@@ -64,19 +71,19 @@ abstract class DsigParserBase extends DsigBase
     ];
 
     /**
-     * @var XMLReader|null
+     * @var XMLReader
      */
-    protected ?XMLReader $reader = null;
+    protected $reader = null;
 
     /**
      * Constructor
      *
      * @param null|XMLReader $reader
      */
-    public function __construct( ? XMLReader $reader = null  )
+    public function __construct( $reader = null  )
     {
         parent::__construct();
-        if( $reader !== null ) {
+        if( ! empty( $reader )) {
             $this->reader = $reader;
         }
     }
@@ -87,57 +94,9 @@ abstract class DsigParserBase extends DsigBase
      * @param null|XMLReader $reader
      * @return static
      */
-    public static function factory( ? XMLReader $reader = null  ) : static
+    public static function factory( $reader = null  ) : self
     {
-        return new static( $reader );
-    }
-
-    /**
-     * @param string $method
-     */
-    protected function logDebug1( string $method ) : void
-    {
-        static $FMTnodeFound = '%s Start (%s) %s';
-        $this->logger->debug(
-            sprintf( $FMTnodeFound, $method, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
-        );
-    }
-
-    /**
-     * @param string $method
-     */
-    protected function logDebug2( string $method ) : void
-    {
-        static $FMTattrFound = '%s Found attribute %s = %s';
-        $this->logger->debug(
-            sprintf( $FMTattrFound, $method, $this->reader->localName, $this->reader->value )
-        );
-    }
-
-    /**
-     * @param string $method
-     */
-    protected function logDebug3( string $method ) : void
-    {
-        static $FMTreadNode  = '%s reading (%s) %s';
-        if( XMLReader::SIGNIFICANT_WHITESPACE !== $this->reader->nodeType ) {
-            $this->logger->debug(
-                sprintf( $FMTreadNode, $method, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
-            );
-        }
-    }
-
-    /**
-     * @param string $method
-     */
-    protected function logDebug4( string $method ) : void
-    {
-        static $FMTnodeEnd = '%s End ';
-        $this->logger->debug( $FMTnodeEnd . $method );
-    }
-
-    protected function isNonEmptyTextNode( int $nodeType ) : bool
-    {
-        return (( XMLReader::TEXT === $nodeType ) && $this->reader->hasValue );
+        $class = get_called_class();
+        return new $class( $reader );
     }
 }

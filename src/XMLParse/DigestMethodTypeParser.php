@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,68 +29,65 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLParse;
 
-use Kigkonsult\DsigSdk\Dto\DigestMethod;
+use Kigkonsult\DsigSdk\Dto\DigestMethodType;
 use XMLReader;
 
+use function sprintf;
+
 /**
- * Class DigestMethodParser
+ * Class DigestMethodTypeParser
  */
 class DigestMethodTypeParser extends DsigParserBase
 {
     /**
      * Parse
      *
-     * @return DigestMethod
+     * @return DigestMethodType
      */
-    public function parse() : DigestMethod
+    public function parse() : DigestMethodType
     {
-        $digestMethod = DigestMethod::factory()->setXMLattributes( $this->reader );
-        $this->logDebug1( __METHOD__ );
+        $digestMethodType = DigestMethodType::factory()->setXMLattributes( $this->reader );
+        $this->logger->debug(
+            sprintf( self::$FMTnodeFound, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+        );
         if( $this->reader->hasAttributes ) {
-            $this->processNodeAttributes( $digestMethod );
+            while( $this->reader->moveToNextAttribute()) {
+                $this->logger->debug(
+                    sprintf( self::$FMTattrFound, __METHOD__, $this->reader->localName, $this->reader->value )
+                );
+                switch( $this->reader->localName ) {
+                    case ( self::ALGORITM ) :
+                        $digestMethodType->setAlgorithm( $this->reader->value );
+                        break;
+                } // end switch
+            } // end while
+            $this->reader->moveToElement();
         }
-        if( ! $this->reader->isEmptyElement ) {
-            $this->processSubNodes( $digestMethod );
+        if( $this->reader->isEmptyElement ) {
+            return $digestMethodType;
         }
-        $this->logDebug4( __METHOD__ );
-        return $digestMethod;
-    }
-
-    /**
-     * @param DigestMethod $digestMethod
-     */
-    private function processNodeAttributes( DigestMethod $digestMethod ) : void
-    {
-        while( $this->reader->moveToNextAttribute()) {
-            $this->logDebug2( __METHOD__ );
-            if( DigestMethod::isXmlAttrKey( $this->reader->localName )) {
-                $digestMethod->setXMLattribute( $this->reader->localName, $this->reader->value );
-            }
-            elseif( self::ALGORITM === $this->reader->localName ) {
-                $digestMethod->setAlgorithm( $this->reader->value );
-            }
-        } // end while
-        $this->reader->moveToElement();
-    }
-
-    /**
-     * @param DigestMethod $digestMethod
-     */
-    protected function processSubNodes( DigestMethod $digestMethod ) : void
-    {
         $headElement = $this->reader->localName;
+        $anyTypes    = [];
         while( @$this->reader->read()) {
-            $this->logDebug3( __METHOD__ );
+            if( XMLReader::SIGNIFICANT_WHITESPACE != $this->reader->nodeType ) {
+                $this->logger->debug(
+                    sprintf( self::$FMTreadNode, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+                );
+            }
             switch( true ) {
-                case ( XMLReader::END_ELEMENT === $this->reader->nodeType ) :
-                    if( $headElement === $this->reader->localName ) {
+                case ( XMLReader::END_ELEMENT == $this->reader->nodeType ) :
+                    if( $headElement == $this->reader->localName ) {
                         break 2;
                     }
                     break;
-                case ( XMLReader::ELEMENT === $this->reader->nodeType ) :
-                    $digestMethod->addAny( AnyTypeParser::factory( $this->reader )->parse());
+                case ( XMLReader::ELEMENT != $this->reader->nodeType ) :
+                    break;
+                default :
+                    $anyTypes[] = AnyTypeParser::factory( $this->reader )->parse();
                     break;
             } // end switch
         } // end while
+        $digestMethodType->setAny( $anyTypes );
+        return $digestMethodType;
     }
 }

@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -31,47 +31,46 @@ namespace Kigkonsult\DsigSdk\Dto;
 
 use InvalidArgumentException;
 
-use Kigkonsult\DsigSdk\Dto\Traits\IdTrait;
 use function gettype;
-use function in_array;
-use function is_object;
 
 /**
- * Class Objekt
+ * Class ObjectType
  */
 class ObjectType extends DsigBase
 {
     /**
      * @var array
      *
-     * Manifest[]|SignatureProperties[]|Any[] mixed
+     * Manifest[]|SignaturePropertiesType[]|AnyType[] mixed
      * in keyed elementSets : [ key => valueType ]
      * key : self::MANIFEST / self::SIGNATUREPROPERTIES / self::ANYTYPE
      * minOccurs="0" maxOccurs="unbounded" namespace="##any" processContents="lax"
+     *
+     *
      */
-    protected array $objectTypes = [];
+    protected $objectTypes = [];
 
     /**
      * Property, get- and setter methods for
      * var string id
      *            attribute name="Id" type="ID" use="optional"
      */
-    use IdTrait;
+    use Traits\IdTrait;
 
     /**
-     * @var null|string
+     * @var string
      *            attribute name="MimeType" type="string" use="optional"
      */
-    protected ?string $mimeType = null;
+    protected $mimeType = null;
 
     /**
-     * @var null|string
+     * @var string
      *            attribute name="Encoding" type="anyURI" use="optional"
      */
-    protected ?string $encoding = null;
+    protected $encoding = null;
 
     /**
-     * @return array Manifest[]|SignatureProperties[]|Any[] mixed
+     * @return array Manifest[]|SignaturePropertiesType[]|AnyType[] mixed
      */
     public function getObjectTypes() : array
     {
@@ -79,53 +78,33 @@ class ObjectType extends DsigBase
     }
 
     /**
-     * Return bool true if objectTypes is not empty
-     *
-     * @return bool
-     */
-    public function isObjectTypesSet() : bool
-    {
-        return ! empty( $this->objectTypes );
-    }
-
-    /**
      * @param string $type
-     * @param mixed $objectType  Manifest / SignatureProperties / Any
+     * @param mixed $objectType  Manifest / SignaturePropertiesType / AnyType
      * @return static
      * @throws InvalidArgumentException
      */
-    public function addObjectType( string $type, mixed $objectType ) : static
+    public function addObjectType( string $type, $objectType ) : self
     {
-        static $ANYTYPEs = [ self::ANY, self::ANYTYPE ];
-        if((( self::MANIFEST === $type ) &&
-                ( $objectType instanceof Manifest )) ||
-            (( self::SIGNATUREPROPERTIES === $type ) &&
-                ( $objectType instanceof SignatureProperties ))) {
+        if((( self::MANIFEST == $type ) &&
+                ( $objectType instanceof ManifestType )) ||
+            (( self::SIGNATUREPROPERTIES == $type ) &&
+                ( $objectType instanceof SignaturePropertiesType )) ||
+            (( self::ANYTYPE == $type ) &&
+                ( $objectType instanceof AnyType ))) {
             $this->objectTypes[] = [ $type => $objectType ];
             return $this;
         }
-        if( ( $objectType instanceof AnyType ) && in_array( $type, $ANYTYPEs, true )) {
-            $this->objectTypes[] = [ self::ANYTYPE => $objectType ];
-            return $this;
-        }
         throw new InvalidArgumentException(
-            sprintf(
-                self::$FMTERR0,
-                self::OBJECT,
-                $type,
-                is_object( $objectType )
-                    ? $objectType::class
-                    : gettype( $objectType )
-            )
+            sprintf( self::$FMTERR0, self::OBJECT, $type, gettype( $objectType ))
         );
     }
 
     /**
-     * @param array $objectTypes * [ type => Manifest|SignatureProperties|Any ]
+     * @param array $objectTypes * [ type => Manifest|SignatureProperties|AnyType ]
      * @return static
      * @throws InvalidArgumentException
      */
-    public function setObjectTypes( array $objectTypes ) : static
+    public function setObjectTypes( array $objectTypes ) : self
     {
         foreach( $objectTypes as $ix => $element ) {
             if( ! is_array( $element )) {
@@ -141,26 +120,16 @@ class ObjectType extends DsigBase
     /**
      * @return null|string
      */
-    public function getMimeType() : ?string
+    public function getMimeType()
     {
         return $this->mimeType;
-    }
-
-    /**
-     * Return bool true if mimeType is set
-     *
-     * @return bool
-     */
-    public function isMimeTypeSet() : bool
-    {
-        return ( null !== $this->mimeType );
     }
 
     /**
      * @param string $mimeType
      * @return static
      */
-    public function setMimeType( string $mimeType ) : static
+    public function setMimeType( string $mimeType ) : self
     {
         $this->mimeType = $mimeType;
         return $this;
@@ -169,25 +138,16 @@ class ObjectType extends DsigBase
     /**
      * @return null|string
      */
-    public function getEncoding() : ?string
+    public function getEncoding()
     {
         return $this->encoding;
     }
 
     /**
-     * Return bool true if encoding is set
-     *
-     * @return bool
-     */
-    public function isEncodingSet() : bool
-    {
-        return ( null !== $this->encoding );
-    }
-    /**
      * @param string $encoding
      * @return static
      */
-    public function setEncoding( string $encoding ) : static
+    public function setEncoding( string $encoding ) : self
     {
         $this->encoding = $encoding;
         return $this;

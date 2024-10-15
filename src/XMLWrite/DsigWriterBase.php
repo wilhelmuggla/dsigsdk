@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -30,10 +30,11 @@ declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLWrite;
 
 use Kigkonsult\DsigSdk\DsigBase;
-use Kigkonsult\DsigSdk\Dto\DsigBase as DtoBase;
 use XMLWriter;
 
+use function get_called_class;
 use function sprintf;
+use function substr;
 
 /**
  * Class DsigWriterBase
@@ -41,14 +42,24 @@ use function sprintf;
 abstract class DsigWriterBase extends DsigBase
 {
     /**
-     * @var XMLWriter|null
+     * @var string
      */
-    protected ?XMLWriter $writer = null;
+    protected static $SP0 = '';
+
+    /**
+     * const XML Schema keys
+     */
+    const XMLSchemaKeys = [ self::XMLNS, self::XMLNS_XSI, self::XMLNS_XSD, self::XSI_SCHEMALOCATION ];
+
+    /**
+     * @var XMLWriter
+     */
+    protected $writer = null;
 
     /**
      * Constructor
      *
-     * @param XMLWriter|null $writer
+     * @param XMLWriter $writer
      */
     public function __construct( XMLWriter $writer = null )
     {
@@ -64,18 +75,24 @@ abstract class DsigWriterBase extends DsigBase
      * @param null|XMLWriter $writer
      * @return static
      */
-    public static function factory( ? XMLWriter $writer = null ) : static
+    public static function factory( $writer = null ) : self
     {
-        return new static( $writer );
+        $class = get_called_class();
+        return new $class( $writer );
     }
 
     /**
      * Set writer start element, incl opt XML-attributes
      *
-     * @param string      $elementName
+     * @param XMLWriter   $writer
+     * @param null|string $elementName
      * @param array       $XMLattributes
      */
-    protected function setWriterStartElement( string $elementName, array $XMLattributes ) : void
+    protected static function setWriterStartElement(
+        XMLWriter $writer,
+        $elementName = null,
+        array $XMLattributes = []
+    )
     {
         $FMTNAME = '%s:%s';
         if( empty( $elementName )) {
@@ -84,10 +101,11 @@ abstract class DsigWriterBase extends DsigBase
         if( isset( $XMLattributes[self::PREFIX] ) && ! empty( $XMLattributes[self::PREFIX] )) {
             $elementName = sprintf( $FMTNAME, $XMLattributes[self::PREFIX], $elementName );
         }
-        $this->writer->startElement( $elementName );
+        $writer->startElement( $elementName );
         foreach( $XMLattributes as $key => $value ) {
-            if( DtoBase::isXmlAttrKey( $key )) {
-                $this->writeAttribute( $key, $value );
+            if( in_array( $key, self::XMLSchemaKeys ) ||
+                ( self::XMLNS == substr( $key, 0, 5 ))) {
+                self::writeAttribute( $writer, $key, $value );
             }
         }
     }
@@ -95,40 +113,40 @@ abstract class DsigWriterBase extends DsigBase
     /**
      * Set writer start element, incl opt XML-attributes
      *
-     * @param string    $elementName
-     * @param array     $XMLattributes
-     * @param mixed     $value
+     * @param XMLWriter   $writer
+     * @param null|string $elementName
+     * @param array       $XMLattributes
+     * @param mixed       $value
      */
-    protected function writeTextElement( string $elementName, array $XMLattributes, mixed $value ) : void
+    protected static function writeTextElement(
+        XMLWriter $writer,
+        $elementName = null,
+        array $XMLattributes = [],
+        $value = null
+    )
     {
-        $this->setWriterStartElement( $elementName, $XMLattributes );
-        $this->writer->text( $value );
-        $this->writer->endElement();
+        self::setWriterStartElement( $writer, $elementName, $XMLattributes );
+        $writer->text( $value );
+        $writer->endElement();
     }
 
     /**
      * Write attribute
      *
+     * @param XMLWriter   $writer
      * @param string      $elementName
      * @param null|string $value
      */
-    protected function writeAttribute( string $elementName, ? string $value = null ) : void
+    protected static function writeAttribute(
+        XMLWriter $writer,
+        string $elementName,
+        $value = null
+    )
     {
         if( null !==  $value ) {
-            $this->writer->startAttribute($elementName );
-            $this->writer->text( $value );
-            $this->writer->endAttribute();
+            $writer->startAttribute($elementName );
+            $writer->text((string) $value );
+            $writer->endAttribute();
         }
-    }
-
-    /**
-     * Return DtoSubject XMLattributes OR (const) DSIGXMLAttributes
-     *
-     * @param DtoBase $subject
-     * @return array
-     */
-    protected static function obtainXMLattributes( DtoBase $subject ) : array
-    {
-        return $subject->isXMLattributesSet() ? $subject->getXMLattributes() : [];
     }
 }

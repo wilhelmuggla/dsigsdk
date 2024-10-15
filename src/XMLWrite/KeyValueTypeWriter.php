@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,7 +29,7 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLWrite;
 
-use Kigkonsult\DsigSdk\Dto\KeyValue;
+use Kigkonsult\DsigSdk\Dto\KeyValueType;
 
 /**
  * Class KeyValueTypeWriter
@@ -38,21 +38,25 @@ class KeyValueTypeWriter extends DsigWriterBase
 {
     /**
      * Write
-     * @param KeyValue $subject
+     * @param KeyValueType $keyValueType
      *
      */
-    public function write( KeyValue $subject ) : void
+    public function write( KeyValueType $keyValueType )
     {
-        $this->setWriterStartElement( self::KEYVALUE, self::obtainXMLattributes( $subject ));
+        $XMLattributes = $keyValueType->getXMLattributes();
+        parent::setWriterStartElement( $this->writer, self::KEYVALUE, $XMLattributes );
 
-        if( $subject->isDSAKeyValueSet()) {
-            DSAKeyValueTypeWriter::factory( $this->writer)->write( $subject->getDSAKeyValue());
+        $DSAKeyValue = $keyValueType->getDSAKeyValue();
+        $RSAKeyValue = $keyValueType->getRSAKeyValue();
+        $any         = $keyValueType->getAny();
+        if( ! empty( $DSAKeyValue )) {
+            DSAKeyValueTypeWriter::factory( $this->writer)->write( $DSAKeyValue );
         }
-        elseif( $subject->isRSAKeyValueSet()) {
-            RSAKeyValueTypeWriter::factory( $this->writer)->write( $subject->getRSAKeyValue());
+        elseif( ! empty( $RSAKeyValue )) {
+            RSAKeyValueTypeWriter::factory( $this->writer)->write( $RSAKeyValue );
         }
-        elseif( $subject->isAnySet()) {
-            AnyTypeWriter::factory( $this->writer)->write( $subject->getAny());
+        elseif( ! empty( $any )) {
+            AnyTypeWriter::factory( $this->writer)->write( $any );
         }
 
         $this->writer->endElement();

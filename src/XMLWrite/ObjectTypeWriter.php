@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,7 +29,7 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLWrite;
 
-use Kigkonsult\DsigSdk\Dto\Objekt;
+use Kigkonsult\DsigSdk\Dto\ObjectType;
 
 /**
  * Class ObjectTypeWriter
@@ -38,40 +38,32 @@ class ObjectTypeWriter extends DsigWriterBase
 {
     /**
      * Write
-     * @param Objekt $subject
+     * @param ObjectType $objectType
      *
      */
-    public function write( Objekt $subject ) : void
+    public function write( ObjectType $objectType )
     {
-        $this->setWriterStartElement( self::OBJECT, self::obtainXMLattributes( $subject ));
+        parent::setWriterStartElement( $this->writer, self::OBJECT, $objectType->getXMLattributes());
 
-        if( $subject->isIdSet()) {
-            $this->writeAttribute( self::ID, $subject->getId());
-        }
-        if( $subject->isMimeTypeSet()) {
-            $this->writeAttribute( self::MIMETYPE, $subject->getMimeType());
-        }
-        if( $subject->isEncodingSet()) {
-            $this->writeAttribute( self::ENCODING, $subject->getEncoding());
-        }
-        if( $subject->isObjectTypesSet()) {
-            foreach( $subject->getObjectTypes() as $element ) {
-                foreach( $element as $key => $value ) {
-                    switch( $key ) {
-                        case self::MANIFEST :
-                            ManifestTypeWriter::factory( $this->writer )->write( $value );
-                            break;
-                        case self::SIGNATUREPROPERTIES :
-                            SignaturePropertiesTypeWriter::factory( $this->writer )->write( $value );
-                            break;
-                        case self::ANY : // fall through
-                        case self::ANYTYPE :
-                            AnyTypeWriter::factory( $this->writer )->write( $value );
-                            break;
-                    } // end switch
-                } // end foreach
+        parent::writeAttribute( $this->writer, self::ID,       $objectType->getId());
+        parent::writeAttribute( $this->writer, self::MIMETYPE, $objectType->getMimeType());
+        parent::writeAttribute( $this->writer, self::ENCODING, $objectType->getEncoding());
+
+        foreach( $objectType->getObjectTypes() as $element ) {
+            foreach( $element as $key => $value ) {
+                switch( $key ) {
+                    case self::MANIFEST :
+                        ManifestTypeWriter::factory( $this->writer )->write( $value );
+                        break;
+                    case self::SIGNATUREPROPERTIES :
+                        SignaturePropertiesTypeWriter::factory( $this->writer )->write( $value );
+                        break;
+                    case self::ANYTYPE :
+                        AnyTypeWriter::factory( $this->writer )->write( $value );
+                        break;
+                } // end switch
             } // end foreach
-        } // end if
+        } // end foreach
 
         $this->writer->endElement();
     }

@@ -1,19 +1,62 @@
+/**
+ * DsigSdk   the PHP XML Digital Signature recomendation SDK,
+ *           source http://www.w3.org/2000/09/xmldsig#
+ *
+ * This file is a part of DsigSdk.
+ *
+ * Copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * author    Kjell-Inge Gustafsson, kigkonsult
+ * Link      https://kigkonsult.se
+ * Package   DsigSdk
+ * Version   0.976
+ * License   Subject matter of licence is the software DsigSdk.
+ *           The above copyright, link, package and version notices,
+ *           this licence notice shall be included in all copies or substantial
+ *           portions of the DsigSdk.
+ *
+ *           DsigSdk is free software: you can redistribute it and/or modify
+ *           it under the terms of the GNU Lesser General Public License as
+ *           published by the Free Software Foundation, either version 3 of the
+ *           License, or (at your option) any later version.
+ *
+ *           DsigSdk is distributed in the hope that it will be useful,
+ *           but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *           GNU Lesser General Public License for more details.
+ *
+ *           You should have received a copy of the GNU Lesser General Public
+ *           License along with DsigSdk.
+ *           If not, see <https://www.gnu.org/licenses/>.
+ */
+
 ## DsigSdk
 
-* PHP SDK of XML Digital Signature recommendation 
-* based on the [XSD] schema 
+* PHP SDK of XML Digital Signature recomendation
+* based on the [XSD] schema
 
 and provide
 
 * dto's for all element(type)s in [XSD]
+  * [src/Dto](src/Dto)
   * with getters and setters, no other logic
-  
+
 * parse of XML into dto(s)
-  
+  * [src/XMLParse/DsigParser::parse](src/XMLParse/DsigParser.php)
+
 * write of dto(s) to XML string / DomNode
-  
-* logic support
-  
+  * [src/XMLWrite/DsigWriter::write](src/XMLWrite/DsigWriter.php)
+
+* logic aid support
+  * [src/Impl](src/Impl)
+    * [common](src/Impl/Common.md) : convenient salt, base64, hex, pack etc unility methods
+    * [Hash](src/Impl/Hash.md) : message digest support
+    * [HmacHash](src/Impl/HmacHash.md) : message hmac digest support
+    * [OpenSSL](src/Impl/OpenSSL.md) : encryption/decryption support
+    * [Misc](src/Impl/Misc.md)
+
+For help finding a good PHP cryptography library, please review
+* [Choosing the Right Cryptography Library for your PHP Project: A Guide ](https://paragonie.com/blog/2015/11/choosing-right-cryptography-library-for-your-php-project-guide)
+
 
 #### Usage, parse XML
 To parse an Dsig (Signature root) XML file (using XMLReader) :
@@ -23,7 +66,7 @@ To parse an Dsig (Signature root) XML file (using XMLReader) :
 namespace Kigkonsult\DsigSdk;
 use Kigkonsult\DsigSdk\XMLParse\DsigParser;
 
-$dsig = DsigParser::factory()->parse( 
+$dsig = DsigParser::factory()->parse(
     file_get_contents( 'DsigFile.xml' )
 );
 
@@ -31,13 +74,13 @@ $signedInfo = $dsig->getsignedInfo();
 ...
 ```
 The XML parser save the XMLreader node properties (baseURI, localName, name, namespaceURI, prefix)
-for each XML (Dto) element as 'XMLattributes' as well as XML attributes (xmlns, xmlns:*, schemaLocation), 
+for each XML (Dto) element as 'XMLattributes' as well as XML attributes (xmlns, xmlns:*, schemaLocation),
 if set (more info below).
 
 'any' [XSD] elements are accepted as 'Anytype' object instances (more info below, 'AnyType').
 
 #### Usage, build up structure
- 
+
 To build up dsig structure:
 ```php
 <?php
@@ -48,24 +91,23 @@ use Kigkonsult\DsigSdk\Dto\KeyInfoType;
 use Kigkonsult\DsigSdk\Dto\SignedInfoType;
 use Kigkonsult\DsigSdk\Dto\SignatureType;
 use Kigkonsult\DsigSdk\Dto\SignatureValueType;
-use Kigkonsult\DsigSdk\Dto\X509DataType;
 
 $dsig = SignatureType::factory()
-    ->setSignedInfo( 
+    ->setSignedInfo(
         SignedInfoType::factory()
             ->setCanonicalizationMethod(
                 CanonicalizationMethodType::factory()
-                    ->setAlgorithm( 'algorithm' )
+                    ->setAlgorithm( SignatureType::MINICANONICAL )
                     ->setAny( [
                         AnyType::factory()
                             ->setElementName( 'nonSchemaElement1')
                             ->setAttributes( [
-                                'id' => '12345' 
+                                'id' => '12345'
                                 ] )
                              ->setContent( 'Lr1mKGxP7VAgMB...' ),
                         AnyType::factory()
                             ->setElementName( 'nonSchemaElement2')
-                            ->setAny( [
+                            ->setSubElements( [
                                 AnyType::factory()
                                     ->setElementName( 'nonSchemaElement3')
                                     ->setContent( 'Lr1mKGxP7VAgMB...' ),
@@ -83,9 +125,9 @@ $dsig = SignatureType::factory()
             ->setKeyInfoType( [
                 [                 // one set of elements
                     [             // element
-                        X509DataType::X509DATA => 
+                        SignatureType::X509DATA =>
                             X509DataType::factory()
-                                ->setX509DataTypes( ... )
+                                ->setX509Certificate( ... )
                     ],
                 ],
         ] )
@@ -113,7 +155,7 @@ To unset (ex. prefix) and 'propagate' down in hierarchy:
 ```php
 $dsig->unsetXMLAttribut( SignatureType::PREFIX, true );
 ```
-To fetch and iterate over XMLAttributes 
+To fetch and iterate over XMLAttributes
 ```php
 foreach( $dsig->getXMLAttributes() as $key => $value {
     ...
@@ -143,16 +185,16 @@ foreach( $anytype->getAttributes() as $key => $value {
 }
 ```
 Note, an AnyType instance may have
-* content 
-  * type string, 
+* content
+  * type string,
   * AnyType::setContent()
   * AnyType::getContent()
 
 or
-* sub-elements 
+* sub-elements
   * type array [*AnyType]
-  * AnyType::setAny()
-  * AnyType::getAny()
+  * AnyType::setSubElements()
+  * AnyType::getSubElements()
 
 but not both.
 
@@ -162,7 +204,7 @@ DsigSdk uses XMLWriter creating output.
 ```php
 $XMLstring = DsigWriter::factory()->write( $dsig );
 ```
-The XMLwriter adds for each element 
+The XMLwriter adds for each element
   * element name with prefix, if exists
   * XMLattribute xmlns, xmlns:* and schemaLocation, if exists.
 
@@ -173,16 +215,16 @@ $domNode = DsigWriter::factory()->write( $dsig, true );
 
 #### Info
 
-For class structure and architecture, please review 
+For class structure and architecture, please review
 * the [XSD]
-* [docs/Dsig.png] class design
-* the [test/DsigLoader] directory
+* [docs/Dsig.png](docs/Dsig.png) class design
+* the [src/DsigLoader](src/DtoLoader) directory
 
-You may find convenient constants in 
-- [src/DsigInterface]
-- [src/XMLAttributesInterface]
+You may find convenient constants in
+- [src/DsigInterface](src/DsigInterface.php)
+- [src/XMLAttributesInterface](src/XMLAttributesInterface.php)
 
-For base64Encode/base64Decode/hash etc support, please review [OpenSSLToolbox]
+For base64Encode/base64Decode/hash support, please review [src/Impl/Impl.md](src/Impl/Impl.md)
 
 #### Installation
 
@@ -198,7 +240,7 @@ In your `composer.json`:
 ``` json
 {
     "require": {
-        "kigkonsult/dsigsdk": "*"
+        "kigkonsult/dsigsdk": "dev-master"
     }
 }
 ```
@@ -236,11 +278,8 @@ For support, please use [Github]/issues.
 This project is licensed under the LGPLv3 License
 
 [Composer]:https://getcomposer.org/
-[docs/Dsig.png]:docs/Dsig.png
 [Github]:https://github.com/iCalcreator/dsigsdk/issues
 [http://www.w3.org/2000/09/xmldsig#]:http://www.w3.org/2000/09/xmldsig#
-[OpenSSLToolbox]:https://github.com/iCalcreator/OpenSSLToolbox
-[src/DsigInterface]:src/DsigInterface.php
-[src/XMLAttributesInterface]:src/XMLAttributesInterface.php
-[test/DsigLoader]:test/DsigLoader
 [XSD]:https://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd
+
+

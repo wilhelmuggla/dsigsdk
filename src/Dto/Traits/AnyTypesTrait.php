@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,17 +29,17 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\Dto\Traits;
 
-use Kigkonsult\DsigSdk\Dto\Any;
+use Kigkonsult\DsigSdk\Dto\AnyType;
 
 trait AnyTypesTrait
 {
     /**
-     * @var Any[]
+     * @var AnyType[]
      */
-    protected array $any = [];
+    protected $any = [];
 
     /**
-     * @return Any[]
+     * @return AnyType[]
      */
     public function getAny() : array
     {
@@ -47,30 +47,20 @@ trait AnyTypesTrait
     }
 
     /**
-     * Return bool true if any is not empty
-     *
-     * @return bool
-     */
-    public function isAnySet() : bool
-    {
-        return ! empty( $this->any );
-    }
-
-    /**
-     * @param Any $any
+     * @param AnyType $any
      * @return static
      */
-    public function addAny( Any $any ) : static
+    public function addAny( AnyType $any ) : self
     {
         $this->any[] = $any;
         return $this;
     }
 
     /**
-     * @param Any[] $any
+     * @param AnyType[] $any
      * @return static
      */
-    public function setAny( array $any ) : static
+    public function setAny( array $any ) : self
     {
         foreach( $any as $anyType ) {
             $this->addAny( $anyType );

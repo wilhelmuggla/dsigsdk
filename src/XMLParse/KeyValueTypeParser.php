@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,8 +29,10 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLParse;
 
-use Kigkonsult\DsigSdk\Dto\KeyValue;
+use Kigkonsult\DsigSdk\Dto\KeyValueType;
 use XMLReader;
+
+use function sprintf;
 
 /**
  * Class KeyValueTypeParser
@@ -40,64 +42,43 @@ class KeyValueTypeParser extends DsigParserBase
     /**
      * Parse
      *
-     * @return KeyValue
+     * @return KeyValueType
      */
-    public function parse() : KeyValue
+    public function parse() :KeyValueType
     {
-        $keyValue = KeyValue::factory()->setXMLattributes( $this->reader );
-        $this->logDebug1( __METHOD__ );
-        if( $this->reader->hasAttributes ) {
-            $this->processNodeAttributes( $keyValue );
+        $keyValueType = KeyValueType::factory()->setXMLattributes( $this->reader );
+        $this->logger->debug(
+            sprintf( self::$FMTnodeFound, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+        );
+        if( $this->reader->isEmptyElement ) {
+            return $keyValueType;
         }
-        if( ! $this->reader->isEmptyElement ) {
-            $this->processSubNodes( $keyValue );
-        }
-        $this->logDebug4( __METHOD__ );
-        return $keyValue;
-    }
-
-    /**
-     * @param KeyValue $keyValue
-     */
-    private function processNodeAttributes( KeyValue $keyValue ) : void
-    {
-        while( $this->reader->moveToNextAttribute()) {
-            $this->logDebug2( __METHOD__ );
-            if( KeyValue::isXmlAttrKey( $this->reader->localName )) {
-                $keyValue->setXMLattribute( $this->reader->localName, $this->reader->value );
-            }
-        } // end while
-        $this->reader->moveToElement();
-    }
-
-    /**
-     * @param KeyValue $keyValue
-     */
-    protected function processSubNodes( KeyValue $keyValue ) : void
-    {
         $headElement = $this->reader->localName;
         while( @$this->reader->read()) {
-            if( XMLReader::SIGNIFICANT_WHITESPACE !== $this->reader->nodeType ) {
-                $this->logDebug4( __METHOD__ );
+            if( XMLReader::SIGNIFICANT_WHITESPACE != $this->reader->nodeType ) {
+                $this->logger->debug(
+                    sprintf( self::$FMTreadNode, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+                );
             }
             switch( true ) {
-                case ( XMLReader::END_ELEMENT === $this->reader->nodeType ) :
-                    if( $headElement === $this->reader->localName ) {
+                case ( XMLReader::END_ELEMENT == $this->reader->nodeType ) :
+                    if( $headElement == $this->reader->localName ) {
                         break 2;
                     }
                     break;
-                case ( XMLReader::ELEMENT !== $this->reader->nodeType ) :
+                case ( XMLReader::ELEMENT != $this->reader->nodeType ) :
                     break;
-                case ( self::DSAKEYVALUE === $this->reader->localName ) :
-                    $keyValue->setDSAKeyValue( DSAKeyValueTypeParser::factory( $this->reader)->parse());
+                case ( self::DSAKEYVALUE == $this->reader->localName ) :
+                    $keyValueType->setDSAKeyValue( DSAKeyValueTypeParser::factory( $this->reader)->parse());
                     break;
-                case ( self::RSAKEYVALUE === $this->reader->localName ) :
-                    $keyValue->setRSAKeyValue( RSAKeyValueTypeParser::factory( $this->reader)->parse());
+                case ( self::RSAKEYVALUE == $this->reader->localName ) :
+                    $keyValueType->setRSAKeyValue( RSAKeyValueTypeParser::factory( $this->reader)->parse());
                     break;
                 default :
-                    $keyValue->setAny( AnyTypeParser::factory( $this->reader)->parse());
+                    $keyValueType->setAny( AnyTypeParser::factory( $this->reader)->parse());
                     break;
             }  // end switch
         }  // end while
+        return $keyValueType;
     }
 }

@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,23 +29,29 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\DsigLoader;
 
-use Exception;
 use Faker;
-use Kigkonsult\DsigSdk\Dto\SignatureProperty as Dto;
-use Kigkonsult\DsigSdk\Dto\Util;
+use Kigkonsult\DsigSdk\Dto\SPKIDataType as Dto;
+use Kigkonsult\DsigSdk\DsigInterface;
 
-class SignatureProperty
+use function base64_encode;
+
+class SPKIDataType implements DsigInterface
 {
     /**
      * @return Dto
-     * @throws Exception
+     * @access static
      */
     public static function loadFromFaker() : Dto
     {
         $faker = Faker\Factory::create();
 
-        return Dto::factoryTarget( $faker->url )
-                  ->setAny( Any::getSomeAnys())
-                  ->setId( Util::getSalt());
+        $max = $faker->numberBetween( 1, 2 );
+        $SPKIDataTypes = [];
+        for( $x = 0; $x <= $max; $x++ ) {
+            $SPKIDataTypes[] = [ self::SPKISEXP => base64_encode( $faker->sha256 ) ];
+            $SPKIDataTypes[] = [ self::ANYTYPE  => AnyType::loadFromFaker() ];
+        }
+        return Dto::factory()
+                  ->setSPKIDataType( $SPKIDataTypes );
     }
 }

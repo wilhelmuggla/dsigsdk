@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -41,16 +41,17 @@ abstract class DsigBase extends LogLevel implements DsigInterface, XMLAttributes
     /**
      * @var mixed
      */
-    protected mixed $logger;
+    protected $logger = null;
 
     /**
      * Constructor
      *
-     * @param null|mixed $dummy
+     * @param mixed $dummy
      */
-    public function __construct( mixed $dummy = null )
+    public function __construct( $dummy = null )
     {
-        $this->logger = LoggerDepot::getLogger( __NAMESPACE__ );
+        $class = get_called_class();
+        $this->logger = LoggerDepot::getLogger( $class );
         if( empty( $this->logger )) {
             $this->logger = new NullLogger();
         }

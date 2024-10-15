@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,28 +29,36 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\DsigLoader;
 
-use Exception;
 use Faker;
-use Kigkonsult\DsigSdk\Dto\SPKIData as Dto;
-use Kigkonsult\DsigSdk\DsigInterface;
+use Kigkonsult\DsigSdk\Dto\PGPDataType as Dto;
 
-class SPKIData implements DsigInterface
+use function base64_encode;
+
+class PGPDataType
 {
     /**
      * @return Dto
-     * @throws Exception
+     * @access static
      */
     public static function loadFromFaker() : Dto
     {
         $faker = Faker\Factory::create();
 
-        $max = random_int( 1, 2 );
-        $SPKIDataTypes = [];
+        $max = $faker->numberBetween( 1, 2 );
+        $anys = [];
         for( $x = 0; $x <= $max; $x++ ) {
-            $SPKIDataTypes[] = [ self::SPKISEXP => base64_encode( $faker->sha256 ) ];
-            $SPKIDataTypes[] = [ self::ANYTYPE  => Any::loadFromFaker() ];
+            $anys[] = AnyType::loadFromFaker();
         }
-        return Dto::factorySPKIDataType( self::SPKISEXP, base64_encode( $faker->sha256 ))
-                  ->setSPKIDataType( $SPKIDataTypes );
+        switch( $faker->numberBetween( 1, 2 )) {
+            case 1 :
+                return Dto::factory()
+                    ->setAny( $anys )
+                    ->setPGPKeyID( base64_encode( $faker->sha256 ))
+                    ->setPGPKeyPacket( base64_encode( $faker->sha256 ));
+            default :
+                return Dto::factory()
+                    ->setAny( $anys )
+                    ->setPGPKeyPacket( base64_encode( $faker->sha256 ));
+        } // end switch
     }
 }

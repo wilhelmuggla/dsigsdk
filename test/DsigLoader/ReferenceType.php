@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,23 +29,26 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\DsigLoader;
 
-use Exception;
 use Faker;
-use Kigkonsult\DsigSdk\Dto\Reference as Dto;
+use Kigkonsult\DsigSdk\Dto\ReferenceType as Dto;
 use Kigkonsult\DsigSdk\Dto\Util;
 
-class Reference
+use function base64_encode;
+
+class ReferenceType
 {
     /**
      * @return Dto
-     * @throws Exception
+     * @access static
      */
     public static function loadFromFaker() : Dto
     {
         $faker = Faker\Factory::create();
 
-        return Dto::factoryDigest( DigestMethod::loadFromFaker(), base64_encode( $faker->sha256 ))
-            ->setTransforms( Transforms::loadFromFaker())
+        return Dto::factory()
+            ->setTransforms( TransformsType::loadFromFaker())
+            ->setDigestMethod( DigestMethodType::loadFromFaker())
+            ->setDigestValue( base64_encode( $faker->sha256 ))
             ->setId( Util::getSalt())
             ->setURI( $faker->url )
             ->setType( $faker->url );

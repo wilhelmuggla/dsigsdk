@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,31 +29,27 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\DsigLoader;
 
-use Exception;
 use Faker;
-use Kigkonsult\DsigSdk\Dto\PGPData as Dto;
+use Kigkonsult\DsigSdk\Dto\ManifestType as Dto;
+use Kigkonsult\DsigSdk\Dto\Util;
 
-class PGPData
+class ManifestType
 {
     /**
      * @return Dto
-     * @throws Exception
+     * @access static
      */
     public static function loadFromFaker() : Dto
     {
         $faker = Faker\Factory::create();
 
-        $anys = Any::getSomeAnys();
-
-        static $choice = true;
-        $return = $choice
-            ? Dto::factoryPGPKeyID( base64_encode( $faker->sha256 ))
-                ->setAny( $anys )
-                ->setPGPKeyPacket( base64_encode( $faker->sha256 ))
-            : Dto::factoryPGPKeyPacket( base64_encode( $faker->sha256 ))
-                ->setAny( $anys );
-        $choice = ! $choice;
-
-        return $return;
+        $max           = $faker->numberBetween( 1, 2 );
+        $referenceType = [];
+        for( $x = 0; $x <= $max; $x++ ) {
+            $referenceType[] = ReferenceType::loadFromFaker();
+        }
+        return Dto::factory()
+            ->setId( Util::getSalt())
+            ->setReference( $referenceType );
     }
 }

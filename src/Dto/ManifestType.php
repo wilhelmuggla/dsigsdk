@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,8 +29,6 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\Dto;
 
-use Kigkonsult\DsigSdk\Dto\Traits\IdTrait;
-
 /**
  * Class ManifestType
  *
@@ -40,31 +38,20 @@ use Kigkonsult\DsigSdk\Dto\Traits\IdTrait;
 class ManifestType extends DsigBase
 {
     /**
-     * @var Reference[]
+     * @var ReferenceType[]
      *                  maxOccurs="unbounded"
      */
-    protected array $reference = [];
+    protected $reference = [];
 
     /**
      * Property, get- and setter methods for
      * var string id
      *            attribute name="Id" type="ID" use="optional"
      */
-    use IdTrait;
+    use Traits\IdTrait;
 
     /**
-     * Factory method with one Reference
-     *
-     * @param Reference $Reference
-     * @return static
-     */
-    public static function factoryReference( Reference $Reference ) : static
-    {
-        return self::factory()->addReference( $Reference );
-    }
-
-    /**
-     * @return Reference[]
+     * @return ReferenceType[]
      */
     public function getReference() : array
     {
@@ -72,29 +59,20 @@ class ManifestType extends DsigBase
     }
 
     /**
-     * @param Reference $referenceType
+     * @param ReferenceType $referenceType
      * @return static
      */
-    public function addReference( Reference $referenceType ) : static
+    public function addReference( ReferenceType $referenceType ) : self
     {
         $this->reference[] = $referenceType;
         return $this;
     }
 
     /**
-     * Return bool true if referenceType is not empty
-     *
-     * @return bool
-     */
-    public function isReferenceTypeSet() : bool
-    {
-        return ! empty( $this->reference );
-    }
-    /**
      * @param Reference[] $referenceType
      * @return static
      */
-    public function setReference( array $referenceType ) : static
+    public function setReference( array $referenceType ) : self
     {
         foreach( $referenceType as $rType ) {
             $this->addReference( $rType );

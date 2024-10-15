@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,8 +29,6 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\Dto;
 
-use Kigkonsult\DsigSdk\Dto\Traits\AnyTypesTrait;
-
 /**
  * Class AnyType
  */
@@ -39,7 +37,7 @@ class AnyType extends DsigBase
     /**
      * @var string
      */
-    protected string $elementName;
+    protected $elementName = null;
 
     /**
      * @var string[]
@@ -51,56 +49,35 @@ class AnyType extends DsigBase
                      processContents = (lax | skip | strict) : strict
                      {any attributes with non-schema Namespace...}>
      */
-    protected array $attributes = [];
+    protected $attributes = [];
 
     /**
      * content
      *
-     * @var null|string
+     * @var string
      */
-    protected ?string $content = null;
+    protected $content = null;
 
     /**
      * Property, get- and setter methods
-     * var Any[]  any
+     * var AnyType[]  any
      */
-    use AnyTypesTrait;
-
-    /**
-     * Factory method with required elementName
-     *
-     * @param string $elementName
-     * @return static
-     */
-    public static function factoryElementName( string $elementName ) : static
-    {
-        return self::factory()->setElementName( $elementName );
-    }
+    use Traits\AnyTypesTrait;
 
 
     /**
-     * @return string
+     * @return null|string
      */
-    public function getElementName() : string
+    public function getElementName()
     {
         return $this->elementName;
     }
 
     /**
-     * Return bool true if elementName is set
-     *
-     * @return bool
-     */
-    public function isElementNameSet() : bool
-    {
-        return ( null !== $this->elementName );
-    }
-
-    /**
      * @param string $elementName
      * @return static
      */
-    public function setElementName( string $elementName ) : static
+    public function setElementName( string $elementName ) : self
     {
         $this->elementName = $elementName;
         return $this;
@@ -115,21 +92,11 @@ class AnyType extends DsigBase
     }
 
     /**
-     * Return bool true if attributes is set
-     *
-     * @return bool
-     */
-    public function isAttributesSet() : bool
-    {
-        return ( null !== $this->attributes );
-    }
-
-    /**
      * @param string $key
      * @param string $value
      * @return static
      */
-    public function addAttribute( string $key, string $value ) : static
+    public function addAttribute( string $key, string $value ) : self
     {
         $this->attributes[$key] = $value;
         return $this;
@@ -139,7 +106,7 @@ class AnyType extends DsigBase
      * @param string[] $attributes
      * @return static
      */
-    public function setAttributes( array $attributes ) : static
+    public function setAttributes( array $attributes ) : self
     {
         foreach( $attributes as $key => $value ) {
             $this->addAttribute( $key, $value );
@@ -150,26 +117,16 @@ class AnyType extends DsigBase
     /**
      * @return null|string
      */
-    public function getContent() : ?string
+    public function getContent()
     {
         return $this->content;
-    }
-
-    /**
-     * Return bool true if content is set
-     *
-     * @return bool
-     */
-    public function isContentSet() : bool
-    {
-        return ( null !== $this->content );
     }
 
     /**
      * @param string $content
      * @return static
      */
-    public function setContent( string $content ) : static
+    public function setContent( string $content ) : self
     {
         $this->content = $content;
         return $this;

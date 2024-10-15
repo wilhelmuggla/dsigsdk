@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -30,7 +30,6 @@ declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\Dto;
 
 use InvalidArgumentException;
-use Kigkonsult\DsigSdk\Dto\Traits\IdTrait;
 use Webmozart\Assert\Assert;
 
 use function is_array;
@@ -46,38 +45,25 @@ class KeyInfoType extends DsigBase
      * @var array
      *
      * Sets of [ KeyName(string)  => valueType ]
-     *    self::KEYNAME         => KeyValue
-     *    self::KEYVALUE        => KeyValue
-     *    self::RETRIEVALMETHOD => RetrievalMethod
-     *    self::X509DATA        => X509Data
-     *    self::PGPDATA         => PGPData
-     *    self::SPKIDATA        => SPKIData
+     *    self::KEYNAME         => KeyValueType
+     *    self::KEYVALUE        => KeyValueType
+     *    self::RETRIEVALMETHOD => RetrievalMethodType
+     *    self::X509DATA        => X509DataType
+     *    self::PGPDATA         => PGPDataType
+     *    self::SPKIDATA        => SPKIDataType
      *    self::MGMTDATA        => string
-     *    self::ANYTYPE         => Any
+     *    self::ANYTYPE         => AnyType
      *
      * choice maxOccurs="unbounded"
      */
-    protected array $keyInfoType = [];
+    protected $keyInfoType = [];
 
     /**
      * Property, get- and setter methods for
      * var string id
      *            attribute name="Id" type="ID" use="optional"
      */
-    use IdTrait;
-
-    /**
-     * Factory method with type and keyInfoType
-     *
-     * @param string $type
-     * @param mixed $keyInfoType
-     * @return static
-     * @throws InvalidArgumentException
-     */
-    public static function factoryKeyInfo( string $type, mixed $keyInfoType ) : static
-    {
-        return self::factory()->addKeyInfoType( $type, $keyInfoType );
-    }
+    use Traits\IdTrait;
 
     /**
      * @return array
@@ -93,23 +79,25 @@ class KeyInfoType extends DsigBase
      * @return static
      * @throws InvalidArgumentException
      */
-    public function addKeyInfoType( string $type, mixed $keyInfoType ) : static
+    public function addKeyInfoType( string $type, $keyInfoType ) : self
     {
         switch( $type ) {
             case self::KEYNAME :
                 Assert::string( $keyInfoType );
                 break;
-            case self::KEYVALUE :        // fall through
-            case self::RETRIEVALMETHOD : // fall through
-            case self::X509DATA :        // fall through
-            case self::PGPDATA :         // fall through
+            case self::KEYVALUE :
+                break;
+            case self::RETRIEVALMETHOD :
+                break;
+            case self::X509DATA :
+                break;
+            case self::PGPDATA :
+                break;
             case self::SPKIDATA :
                 break;
             case self::MGMTDATA :
                 Assert::string( $keyInfoType );
                 break;
-            case  self::ANY :
-                $type = self::ANYTYPE; // fall through
             case self::ANYTYPE :
                 break;
             default :
@@ -122,20 +110,11 @@ class KeyInfoType extends DsigBase
     }
 
     /**
-     * Return bool true if keyInfoType is not empty
-     *
-     * @return bool
-     */
-    public function isKeyInfoTypeSet() : bool
-    {
-        return ! empty( $this->keyInfoType );
-    }
-    /**
      * @param array $keyInfoType *[ type => value ]
      * @return static
      * @throws InvalidArgumentException
      */
-    public function setKeyInfoType( array $keyInfoType ) : static
+    public function setKeyInfoType( array $keyInfoType ) : self
     {
         foreach( $keyInfoType as $ix => $element ) {
             if( ! is_array( $element )) {

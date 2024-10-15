@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,7 +29,7 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLWrite;
 
-use Kigkonsult\DsigSdk\Dto\RSAKeyValue;
+use Kigkonsult\DsigSdk\Dto\RSAKeyValueType;
 
 /**
  * Class RSAKeyValueTypeWriter
@@ -38,19 +38,32 @@ class RSAKeyValueTypeWriter extends DsigWriterBase
 {
     /**
      * Write
-     * @param RSAKeyValue $subject
+     * @param RSAKeyValueType $RSAKeyValueType
      *
      */
-    public function write( RSAKeyValue $subject ) : void
+    public function write( RSAKeyValueType $RSAKeyValueType )
     {
-        $XMLattributes = self::obtainXMLattributes( $subject );
-        $this->setWriterStartElement( self::RSAKEYVALUE, $XMLattributes );
+        $XMLattributes = $RSAKeyValueType->getXMLattributes();
+        parent::setWriterStartElement( $this->writer, self::RSAKEYVALUE, $XMLattributes );
 
-        if( $subject->isModulusSet()) {
-            $this->writeTextElement( self::MODULUS, $XMLattributes, $subject->getModulus());
+
+        $modulus = $RSAKeyValueType->getModulus();
+        if( ! empty( $modulus )) {
+            parent::writeTextElement(
+                $this->writer,
+                self::MODULUS,
+                $XMLattributes,
+                $modulus
+            );
         }
-        if( $subject->isExponentSet()) {
-            $this->writeTextElement( self::EXPONENT, $XMLattributes, $subject->getExponent());
+        $exponent = $RSAKeyValueType->getExponent();
+        if( ! empty( $exponent )) {
+            parent::writeTextElement(
+                $this->writer,
+                self::EXPONENT,
+                $XMLattributes,
+                $exponent
+            );
         }
 
         $this->writer->endElement();

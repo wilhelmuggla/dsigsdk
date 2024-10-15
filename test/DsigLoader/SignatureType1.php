@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,31 +29,35 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\DsigLoader;
 
-use Exception;
-use Kigkonsult\DsigSdk\Dto\SignatureProperties as Dto;
+use Kigkonsult\DsigSdk\Dto\SignatureType as Dto;
 use Faker;
-use Kigkonsult\DsigSdk\Dto\Util;
 
-class SignatureProperties
+/**
+ * Class Signature
+ *
+ * schemaLocation="http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd"
+ * namespace="http://www.w3.org/2000/09/xmldsig#"
+ */
+class SignatureType1
 {
     /**
      * @return Dto
-     * @throws Exception
+     * @access static
      */
     public static function loadFromFaker() : Dto
     {
         $faker = Faker\Factory::create();
 
-        $max = random_int( 0, 2 );
-        $signatureProperties = [];
-        for( $x = 0; $x < $max; $x++ ) {
-            $signatureProperties[] = SignatureProperty::loadFromFaker();
+        $max = $faker->numberBetween( 1, 2 );
+        $objects = [];
+        for( $x = 0; $x <= $max; $x++ ) {
+            $objects[] = ObjectType::loadFromFaker();
         }
-        $dto = Dto::factorySignatureProperty( SignatureProperty::loadFromFaker())
-            ->setId( Util::getSalt());
-        if( ! empty( $signatureProperties )) {
-            $dto->setSignatureProperty( $signatureProperties );
-        }
-        return $dto;
+        return Dto::factory()
+            ->setId( $faker->md5 )
+            ->setSignedInfo( SignedInfoType::loadFromFaker())
+            ->setSignatureValue( SignatureValueType::loadFromFaker())
+            ->setKeyInfo( KeyInfoType::loadFromFaker())
+            ->setObject( $objects );
     }
 }

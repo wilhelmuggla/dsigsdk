@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -35,8 +35,6 @@ use Kigkonsult\DsigSdk\XMLAttributesInterface;
 use Webmozart\Assert\Assert;
 use XMLReader;
 
-use function in_array;
-
 /**
  * Class DsigBase
  */
@@ -45,22 +43,26 @@ abstract class DsigBase implements DsigInterface, XMLAttributesInterface
     /**
      * @var string
      */
-    protected static string $FMTERR0 = 'Unknown %s type (%s) \'%s\'';
-    protected static string $FMTERR1 = 'Unknown %s type #%s \'%s\'';
+    protected static $FMTERR0 = 'Unknown %s type (%s) \'%s\'';
+    protected static $FMTERR1 = 'Unknown %s type #%s \'%s\'';
+    protected static $FMTERR2 = 'Unknown %s type #%s:%s \'%s\'';
+    protected static $PLCHDLR = '%s';
+    protected static $TYPE    = 'Type';
 
     /**
      * @var array
      */
-    protected array $XMLattributes = [];
+    protected $XMLattributes = [];
 
     /**
      * Factory method
      *
      * @return static
      */
-    public static function factory() : static
+    public static function factory() : self
     {
-        return new static();
+        $class = get_called_class();
+        return new $class();
     }
 
     /**
@@ -74,32 +76,19 @@ abstract class DsigBase implements DsigInterface, XMLAttributesInterface
     }
 
     /**
-     * Return bool true if XMLattributes is not empty OR key is set
-     *
-     * @param null|string $key
-     * @return bool
-     */
-    public function isXMLattributesSet( ? string $key = null ) : bool
-    {
-        return empty( $key )
-            ? ! empty( $this->XMLattributes )
-            : isset( $this->XMLattributes[$key] );
-    }
-
-    /**
-     * Set single XML attribute, opt propagate down in hierachy
+     * Set XML attributes, opt propagate down
      *
      * @param string    $key
      * @param string    $value
-     * @param bool|null $propagateDown
+     * @param null|bool $propagateDown
      * @return static
      * @throws InvalidArgumentException
      */
     public function setXMLattribute(
         string $key,
         string $value,
-        ? bool $propagateDown = false
-    ) : static
+        $propagateDown = false
+    ) : self
     {
         Assert::string( $key );
         Assert::string( $value );
@@ -115,11 +104,11 @@ abstract class DsigBase implements DsigInterface, XMLAttributesInterface
      * Unset XML attribute, opt down
      *
      * @param string    $key
-     * @param bool|null $propagateDown
+     * @param null|bool $propagateDown
      * @return static
      * @throws InvalidArgumentException
      */
-    public function unsetXMLattribute( string $key, ?bool $propagateDown ) : static
+    public function unsetXMLattribute( string $key, $propagateDown = false ) : self
     {
         Assert::string( $key );
         unset( $this->XMLattributes[$key] );
@@ -142,16 +131,16 @@ abstract class DsigBase implements DsigInterface, XMLAttributesInterface
     protected static function propagateDown(
         DsigBase $dsigBase,
         string $key,
-        ? string $value = null,
-        ? bool $unset = false
-    ) : void
+        $value = null,
+        $unset = false
+    )
     {
         Assert::boolean( $unset );
         if( $unset ) {
             unset( $dsigBase->XMLattributes[$key] );
         }
         foreach( get_object_vars( $dsigBase ) as $propertyValue ) {
-            if( $propertyValue instanceof self ) {
+            if( $propertyValue instanceof DsigBase ) {
                 if( $unset ) {
                     $propertyValue->unsetXMLattribute( $key, true );
                 }
@@ -177,13 +166,13 @@ abstract class DsigBase implements DsigInterface, XMLAttributesInterface
     protected static function propagateDownArray(
         array $arrayValue,
         string $key,
-        ? string $value = null,
-        ? bool $unset = false
-    ) : void
+        $value = null,
+        $unset = false
+    )
     {
         Assert::boolean( $unset );
         foreach( $arrayValue as $arrayValue2 ) {
-            if( $arrayValue2 instanceof self ) {
+            if( $arrayValue2 instanceof DsigBase ) {
                 if( $unset ) {
                     $arrayValue2->unsetXMLattribute( $key, true );
                 }
@@ -198,30 +187,27 @@ abstract class DsigBase implements DsigInterface, XMLAttributesInterface
     }
 
     /**
-     * Set XML attributes (baseURI, localName, name, name prefix, namespaceURI) from XMLreader (Element node)
+     * Set XML attributes from XMLreader ( Element node)
      *
      * @param XMLReader $reader
      * @return static
      */
-    public function setXMLattributes( XMLReader $reader ) : static
+    public function setXMLattributes( XMLReader $reader ) : self
     {
         $this->XMLattributes[self::BASEURI]      = $reader->baseURI ;
         $this->XMLattributes[self::LOCALNAME]    = $reader->localName ;
         $this->XMLattributes[self::NAME]         = $reader->name ;
-        $this->XMLattributes[self::PREFIX]       = $reader->prefix ;
         $this->XMLattributes[self::NAMESPACEURI] = $reader->namespaceURI ;
+        $this->XMLattributes[self::PREFIX]       = $reader->prefix ;
         return $this;
     }
 
     /**
-     * Return bool true if key is a XML schema key
-     *
-     * @param string $key
-     * @return bool
+     * @return string
      */
-    public static function isXmlAttrKey( string $key ) : bool
+    protected static function getNs() : string
     {
-        return ( in_array( $key, self::XMLSchemaKeys, true ) ||
-            ( str_starts_with( $key, self::XMLNS )));
+        static $BS = '\\';
+        return __NAMESPACE__ . $BS;
     }
 }

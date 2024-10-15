@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -32,123 +32,74 @@ namespace Kigkonsult\DsigSdk\Dto;
 class KeyValueType extends DsigBase
 {
     /**
-     * @var DSAKeyValue|null
+     * @var DSAKeyValueType
      *                     choice opt 1
      */
-    protected ?DSAKeyValue $DSAKeyValue = null;
+    protected $DSAKeyValue = null;
 
     /**
-     * @var RSAKeyValue|null
+     * @var RSAKeyValueType
      *                     choice opt 2
      */
-    protected ?RSAKeyValue $RSAKeyValue = null;
+    protected $RSAKeyValue = null;
 
     /**
-     * @var Any|null
+     * @var AnyType
      *           any namespace="##other" processContents="lax"
      *                     choice opt 3
      */
-    protected ?Any $any = null;
+    protected $any = null;
+
 
     /**
-     * Factory method with DSAKeyValue
-     *
-     * @param DSAKeyValue $DSAKeyValue
-     * @return static
+     * @return null|DSAKeyValueType
      */
-    public static function factoryDSAKeyValue( DSAKeyValue $DSAKeyValue ) : static
-    {
-        return self::factory()->setDSAKeyValue( $DSAKeyValue );
-    }
-
-    /**
-     * Factory method with RSAKeyValue
-     *
-     * @param RSAKeyValue $RSAKeyValue
-     * @return static
-     */
-    public static function factoryRSAKeyValue( RSAKeyValue $RSAKeyValue ) : static
-    {
-        return self::factory()->setRSAKeyValue( $RSAKeyValue );
-    }
-
-    /**
-     * @return null|DSAKeyValue
-     */
-    public function getDSAKeyValue() : ?DSAKeyValue
+    public function getDSAKeyValue()
     {
         return $this->DSAKeyValue;
     }
 
     /**
-     * Return bool true if DSAKeyValue is set
-     *
-     * @return bool
-     */
-    public function isDSAKeyValueSet() : bool
-    {
-        return ( null !== $this->DSAKeyValue );
-    }
-
-    /**
-     * @param DSAKeyValue $DSAKeyValue
+     * @param DSAKeyValueType $DSAKeyValue
      * @return static
      */
-    public function setDSAKeyValue( DSAKeyValue $DSAKeyValue ) : static
+    public function setDSAKeyValue( DSAKeyValueType $DSAKeyValue ) : self
     {
         $this->DSAKeyValue = $DSAKeyValue;
         return $this;
     }
 
     /**
-     * @return null|RSAKeyValue
+     * @return null|RSAKeyValueType
      */
-    public function getRSAKeyValue() : ?RSAKeyValue
+    public function getRSAKeyValue()
     {
         return $this->RSAKeyValue;
     }
 
     /**
-     * Return bool true if RSAKeyValue is set
-     *
-     * @return bool
-     */
-    public function isRSAKeyValueSet() : bool
-    {
-        return ( null !== $this->RSAKeyValue );
-    }
-    /**
-     * @param RSAKeyValue $RSAKeyValue
+     * @param RSAKeyValueType $RSAKeyValue
      * @return static
      */
-    public function setRSAKeyValue( RSAKeyValue $RSAKeyValue ) : static
+    public function setRSAKeyValue( RSAKeyValueType $RSAKeyValue ) : self
     {
         $this->RSAKeyValue = $RSAKeyValue;
         return $this;
     }
 
     /**
-     * @return null|Any
+     * @return null|AnyType
      */
-    public function getAny() : ?Any
+    public function getAny()
     {
         return $this->any;
     }
 
     /**
-     * Return bool true if any is set
-     *
-     * @return bool
-     */
-    public function isAnySet() : bool
-    {
-        return ( null !== $this->any );
-    }
-    /**
-     * @param Any $anyType
+     * @param AnyType $anyType
      * @return static
      */
-    public function setAny( Any $anyType ) : static
+    public function setAny( AnyType $anyType ) : self
     {
         $this->any = $anyType;
         return $this;

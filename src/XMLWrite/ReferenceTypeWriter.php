@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,7 +29,7 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLWrite;
 
-use Kigkonsult\DsigSdk\Dto\Reference;
+use Kigkonsult\DsigSdk\Dto\ReferenceType;
 
 /**
  * Class ReferenceTypeWriter
@@ -38,28 +38,33 @@ class ReferenceTypeWriter extends DsigWriterBase
 {
     /**
      * Write
-     * @param Reference $subject
+     * @param ReferenceType $referenceType
      *
      */
-    public function write( Reference $subject ) : void
+    public function write( ReferenceType $referenceType )
     {
-        $XMLattributes = self::obtainXMLattributes( $subject );
-        $this->setWriterStartElement( self::REFERENS, $XMLattributes );
+        $XMLattributes = $referenceType->getXMLattributes();
+        parent::setWriterStartElement( $this->writer, self::REFERENS, $XMLattributes );
 
-        if( $subject->isURISet()) {
-            $this->writeAttribute( self::URI, $subject->getURI());
+        parent::writeAttribute( $this->writer, self::URI,  $referenceType->getURI());
+        parent::writeAttribute( $this->writer, self::TYPE, $referenceType->getType());
+
+        $transforms = $referenceType->getTransforms();
+        if( ! empty( $transforms )) {
+            TransformsTypeWriter::factory( $this->writer)->write( $transforms );
         }
-        if( $subject->isTypeSet()) {
-            $this->writeAttribute( self::TYPE, $subject->getType());
+        $digestMethod = $referenceType->getDigestMethod();
+        if( ! empty( $digestMethod )) {
+            DigestMethodTypeWriter::factory( $this->writer)->write( $digestMethod );
         }
-        if( $subject->isTransformsSet()) {
-            TransformsTypeWriter::factory( $this->writer)->write( $subject->getTransforms());
-        }
-        if( $subject->isDigestMethodSet()) {
-            DigestMethodTypeWriter::factory( $this->writer)->write( $subject->getDigestMethod());
-        }
-        if( $subject->isDigestValueSet()) {
-            $this->writeTextElement( self::DIGESTVALUE, $XMLattributes, $subject->getDigestValue());
+        $digestValue = $referenceType->getDigestValue();
+        if( ! empty( $digestValue )) {
+            parent::writeTextElement(
+                $this->writer,
+                self::DIGESTVALUE,
+                $XMLattributes,
+                $digestValue
+            );
         }
 
         $this->writer->endElement();

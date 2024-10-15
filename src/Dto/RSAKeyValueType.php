@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -35,51 +35,28 @@ namespace Kigkonsult\DsigSdk\Dto;
 class RSAKeyValueType  extends DsigBase
 {
     /**
-     * @var null|string   type="ds:CryptoBinary" - base="base64Binary"
+     * @var string   type="ds:CryptoBinary" - base="base64Binary"
      */
-    protected ?string $modulus = null;
+    protected $modulus = null;
 
     /**
-     * @var null|string   type="ds:CryptoBinary" - base="base64Binary"
+     * @var string   type="ds:CryptoBinary" - base="base64Binary"
      */
-    protected ?string $exponent = null;
-
-    /**
-     * Factory method with digestMethod and digestValue
-     *
-     * @param string $modulus
-     * @param string $exponent
-     * @return static
-     */
-    public static function factoryModulusExponent( string $modulus, string $exponent ) : static
-    {
-        return self::factory()
-            ->setModulus( $modulus )
-            ->setExponent( $exponent );
-    }
+    protected $exponent = null;
 
     /**
      * @return null|string
      */
-    public function getModulus() : ?string
+    public function getModulus()
     {
         return $this->modulus;
     }
 
     /**
-     * Return bool true if modulus is set
-     *
-     * @return bool
-     */
-    public function isModulusSet() : bool
-    {
-        return ( null !== $this->modulus );
-    }
-    /**
      * @param string $modulus
      * @return static
      */
-    public function setModulus( string $modulus ) : static
+    public function setModulus( string $modulus ) : self
     {
         $this->modulus = $modulus;
         return $this;
@@ -88,26 +65,16 @@ class RSAKeyValueType  extends DsigBase
     /**
      * @return null|string
      */
-    public function getExponent() : ?string
+    public function getExponent()
     {
         return $this->exponent;
-    }
-
-    /**
-     * Return bool true if exponent is set
-     *
-     * @return bool
-     */
-    public function isExponentSet() : bool
-    {
-        return ( null !== $this->exponent );
     }
 
     /**
      * @param string $exponent
      * @return static
      */
-    public function setExponent( string $exponent ) : static
+    public function setExponent( string $exponent ) : self
     {
         $this->exponent = $exponent;
         return $this;

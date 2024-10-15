@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,8 +29,10 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLParse;
 
-use Kigkonsult\DsigSdk\Dto\RetrievalMethod;
+use Kigkonsult\DsigSdk\Dto\RetrievalMethodType;
 use XMLReader;
+
+use function sprintf;
 
 /**
  * Class RetrievalMethodTypeParser
@@ -41,65 +43,63 @@ class RetrievalMethodTypeParser extends DsigParserBase
     /**
      * Parse
      *
-     * @return RetrievalMethod
+     * @return RetrievalMethodType
      */
-    public function parse() : RetrievalMethod
+    public function parse() : RetrievalMethodType
     {
-        $retrievalMethod = RetrievalMethod::factory()->setXMLattributes( $this->reader );
-        $this->logDebug1( __METHOD__ );
+        $retrievalMethodType = RetrievalMethodType::factory()->setXMLattributes( $this->reader );
+        $this->logger->debug(
+            sprintf( self::$FMTnodeFound, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+        );
         if( $this->reader->hasAttributes ) {
-            $this->processNodeAttributes( $retrievalMethod );
+            while( $this->reader->moveToNextAttribute()) {
+                $this->logger->debug(
+                    sprintf( self::$FMTattrFound, __METHOD__, $this->reader->localName, $this->reader->value )
+                );
+                switch( $this->reader->localName ) {
+                    case ( self::URI ) :
+                        $retrievalMethodType->setURI( $this->reader->value );
+                        break;
+                    case ( self::TYPE ) :
+                        $retrievalMethodType->setType( $this->reader->value );
+                        break;
+                } // end switch
+            } // end while
+            $this->reader->moveToElement();
         }
-        if( ! $this->reader->isEmptyElement ) {
-            $this->processSubNodes( $retrievalMethod );
+        if( $this->reader->isEmptyElement ) {
+            return $retrievalMethodType;
         }
-        $this->logDebug4( __METHOD__ );
-        return $retrievalMethod;
-    }
-
-    /**
-     * @param RetrievalMethod $retrievalMethod
-     */
-    private function processNodeAttributes( RetrievalMethod $retrievalMethod ) : void
-    {
-        while( $this->reader->moveToNextAttribute()) {
-            $this->logDebug2( __METHOD__ );
-            switch( $this->reader->localName ) {
-                case ( self::URI ) :
-                    $retrievalMethod->setURI( $this->reader->value );
-                    break;
-                case ( self::TYPE ) :
-                    $retrievalMethod->setType( $this->reader->value );
-                    break;
-                default:
-                    if( RetrievalMethod::isXmlAttrKey( $this->reader->localName )) {
-                        $retrievalMethod->setXMLattribute( $this->reader->localName, $this->reader->value );
-                    }
-                    break;
-            } // end switch
-        } // end while
-        $this->reader->moveToElement();
-    }
-
-    /**
-     * @param RetrievalMethod $retrievalMethod
-     */
-    private function processSubNodes( RetrievalMethod $retrievalMethod ) : void
-    {
         $headElement    = $this->reader->localName;
+        $currentElement = null;
         while( @$this->reader->read()) {
-            $this->logDebug3( __METHOD__ );
+            if( XMLReader::SIGNIFICANT_WHITESPACE != $this->reader->nodeType ) {
+                $this->logger->debug(
+                    sprintf( self::$FMTreadNode, __METHOD__, self::$nodeTypes[$this->reader->nodeType], $this->reader->localName )
+                );
+            }
             switch( true ) {
-                case ( XMLReader::END_ELEMENT === $this->reader->nodeType ) :
-                    if( $headElement === $this->reader->localName ) {
+                case ( XMLReader::END_ELEMENT == $this->reader->nodeType ) :
+                    if( $headElement == $this->reader->localName ) {
                         break 2;
                     }
+                    $currentElement = null;
                     break;
-                case (( XMLReader::ELEMENT === $this->reader->nodeType ) &&
-                    ( self::TRANSFORMS === $this->reader->localName )) :
-                    $retrievalMethod->setTransforms( TransformsTypeParser::factory( $this->reader )->parse());
+                case (( XMLReader::TEXT == $this->reader->nodeType ) && ! $this->reader->hasValue ) :
+                    break;
+                case (( XMLReader::TEXT == $this->reader->nodeType ) && ( self::URI == $currentElement )) :
+                    $retrievalMethodType->setURI( $this->reader->value);
+                    break;
+                case ( XMLReader::ELEMENT != $this->reader->nodeType ) :
+                    break;
+                case ( self::TRANSFORMS == $this->reader->localName ) :
+                    $retrievalMethodType->setTransforms( TransformsTypeParser::factory( $this->reader )->parse());
+                    break;
+                case ( self::URI == $this->reader->localName ) :
+                    $currentElement = $this->reader->localName;
                     break;
             } // end switch
         } // end while
+        return $retrievalMethodType;
     }
 }

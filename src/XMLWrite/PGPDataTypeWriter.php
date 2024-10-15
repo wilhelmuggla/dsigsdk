@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,7 +29,7 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLWrite;
 
-use Kigkonsult\DsigSdk\Dto\PGPData;
+use Kigkonsult\DsigSdk\Dto\PGPDataType;
 
 /**
  * Class PGPDataTypeWriter
@@ -38,24 +38,34 @@ class PGPDataTypeWriter extends DsigWriterBase
 {
     /**
      * Write
-     * @param PGPData $subject
+     * @param PGPDataType $PGPDataType
      *
      */
-    public function write( PGPData $subject ) : void
+    public function write( PGPDataType $PGPDataType )
     {
-        $XMLattributes = self::obtainXMLattributes( $subject );
-        $this->setWriterStartElement( self::PGPDATA, $XMLattributes );
+        $XMLattributes = $PGPDataType->getXMLattributes();
+        parent::setWriterStartElement( $this->writer, self::PGPDATA, $XMLattributes );
 
-        if( $subject->isPGPKeyIDSet()) {
-            $this->writeTextElement( self::PGPKEYID, $XMLattributes, $subject->getPGPKeyID());
+        $PGPKeyID = $PGPDataType->getPGPKeyID();
+        if( ! empty( $PGPKeyID )) {
+            parent::writeTextElement(
+                $this->writer,
+                self::PGPKEYID,
+                $XMLattributes,
+                $PGPKeyID
+            );
         }
-        if( $subject->isPGPKeyPacketSet()) {
-            $this->writeTextElement( self::PGPKEYPACKET, $XMLattributes, $subject->getPGPKeyPacket());
+        $PGPKeyPacket = $PGPDataType->getPGPKeyPacket();
+        if( ! empty( $PGPKeyPacket )) {
+            parent::writeTextElement(
+                $this->writer,
+                self::PGPKEYPACKET,
+                $XMLattributes,
+                $PGPKeyPacket
+            );
         }
-        if( $subject->isAnySet()) {
-            foreach( $subject->getAny() as $any ) {
-                AnyTypeWriter::factory( $this->writer )->write( $any );
-            }
+        foreach( $PGPDataType->getAny() as $any ) {
+            AnyTypeWriter::factory( $this->writer )->write( $any );
         }
 
         $this->writer->endElement();

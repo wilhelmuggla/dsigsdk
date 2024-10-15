@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -35,10 +35,10 @@ use Kigkonsult\DsigSdk\Dto\Util;
 trait AlgorithmTrait
 {
     /**
-     * @var null|string
+     * @var string
      *          type="anyURI"
      */
-    protected ? string $algorithm = null;
+    protected $algorithm = null;
 
     /**
      * Return (trailing)) algorithm from (URI) identifier
@@ -46,7 +46,7 @@ trait AlgorithmTrait
      * @return null|string
      * @throws InvalidArgumentException
      */
-    public function extractAlgorithmFromUriIdentifier() : ?string
+    public function extractAlgorithmFromUriIdentifier()
     {
         if( empty( $this->algorithm )) {
             return null;
@@ -57,26 +57,17 @@ trait AlgorithmTrait
     /**
      * @return null|string
      */
-    public function getAlgorithm() : ?string
+    public function getAlgorithm()
     {
         return $this->algorithm;
     }
 
     /**
-     * Return bool true if algorithm is set
-     *
-     * @return bool
-     */
-    public function isAlgorithmSet() : bool
-    {
-        return ( null !== $this->algorithm );
-    }
-
-    /**
      * @param string $algorithm
      * @return static
+     * @throws InvalidArgumentException
      */
-    public function setAlgorithm( string $algorithm ) : static
+    public function setAlgorithm( string $algorithm ) : self
     {
         $this->algorithm = $algorithm;
         return $this;

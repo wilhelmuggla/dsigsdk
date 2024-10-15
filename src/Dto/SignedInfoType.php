@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,96 +29,74 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\Dto;
 
-use Kigkonsult\DsigSdk\Dto\Traits\IdTrait;
-
 /**
  * Class SignedInfoType
  */
 class SignedInfoType extends DsigBase
 {
     /**
-     * @var CanonicalizationMethod|null
+     * @var CanonicalizationMethodType
      */
-    protected ?CanonicalizationMethod $canonicalizationMethod = null;
+    protected $canonicalizationMethod = null;
 
     /**
-     * @var SignatureMethod|null
+     * @var SignatureMethodType
      */
-    protected ?SignatureMethod $signatureMethod = null;
+    protected $signatureMethod = null;
 
     /**
-     * @var Reference[]
+     * @var ReferenceType[]
      *                    maxOccurs="unbounded"
      */
-    protected array $reference = [];
+    protected $reference = [];
 
     /**
      * Property, get- and setter methods for
      * var string id
      *            attribute name="Id" type="ID" use="optional"
      */
-    use IdTrait;
+    use Traits\IdTrait;
 
     /**
-     * @return null|CanonicalizationMethod
+     * @return null|CanonicalizationMethodType
      */
-    public function getCanonicalizationMethod() : ?CanonicalizationMethod
+    public function getCanonicalizationMethod()
     {
         return $this->canonicalizationMethod;
     }
 
     /**
-     * Return bool true if canonicalizationMethod is set
-     *
-     * @return bool
-     */
-    public function isCanonicalizationMethodSet() : bool
-    {
-        return ( null !== $this->canonicalizationMethod );
-    }
-
-    /**
-     * @param CanonicalizationMethod $canonicalizationMethod
+     * @param CanonicalizationMethodType $canonicalizationMethod
      * @return static
      */
     public function setCanonicalizationMethod(
-        CanonicalizationMethod $canonicalizationMethod
-    ) : static
+        CanonicalizationMethodType $canonicalizationMethod
+    ) : self
     {
         $this->canonicalizationMethod = $canonicalizationMethod;
         return $this;
     }
 
     /**
-     * @return null|SignatureMethod
+     * @return null|SignatureMethodType
      */
-    public function getSignatureMethod() : ?SignatureMethod
+    public function getSignatureMethod()
     {
         return $this->signatureMethod;
     }
 
     /**
-     * Return bool true if signatureMethod is set
-     *
-     * @return bool
-     */
-    public function isSignatureMethodSet() : bool
-    {
-        return ( null !== $this->signatureMethod );
-    }
-
-    /**
-     * @param SignatureMethod $signatureMethod
+     * @param SignatureMethodType $signatureMethod
      * @return static
      */
-    public function setSignatureMethod( SignatureMethod $signatureMethod ) : static
+    public function setSignatureMethod( SignatureMethodType $signatureMethod ) : self
     {
         $this->signatureMethod = $signatureMethod;
         return $this;
     }
 
     /**
-     * @return Reference[]
+     * @return ReferenceType[]
      */
     public function getReference() : array
     {
@@ -126,30 +104,20 @@ class SignedInfoType extends DsigBase
     }
 
     /**
-     * Return bool true if reference is not empty
-     *
-     * @return bool
-     */
-    public function isReferenceSet() : bool
-    {
-        return ! empty( $this->reference );
-    }
-
-    /**
-     * @param Reference $reference
+     * @param ReferenceType $reference
      * @return static
      */
-    public function addReference( Reference $reference ) : static
+    public function addReference( ReferenceType $reference ) : self
     {
         $this->reference[] = $reference;
         return $this;
     }
 
     /**
-     * @param Reference[] $reference
+     * @param ReferenceType[] $reference
      * @return static
      */
-    public function setReference( array $reference ) : static
+    public function setReference( array $reference ) : self
     {
         foreach( $reference as $rType ) {
             $this->addReference( $rType );

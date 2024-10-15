@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -30,19 +30,27 @@ declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\DsigLoader;
 
 use Faker;
-use Kigkonsult\DsigSdk\Dto\SignatureValue as Dto;
+use Kigkonsult\DsigSdk\Dto\SignaturePropertyType as Dto;
 use Kigkonsult\DsigSdk\Dto\Util;
 
-class SignatureValue
+class SignaturePropertyType
 {
     /**
      * @return Dto
+     * @access static
      */
     public static function loadFromFaker() : Dto
     {
         $faker = Faker\Factory::create();
 
-        return Dto::factorySignatureValueType( base64_encode( $faker->sha256 ))
-            ->setId( Util::getSalt());
+        $max = $faker->numberBetween( 1, 2 );
+        $anys = [];
+        for( $x = 0; $x < $max; $x++ ) {
+            $anys[] = AnyType::loadFromFaker();
+        }
+        return Dto::factory()
+                  ->setAny( $anys )
+                  ->setTarget( $faker->url )
+                  ->setId( Util::getSalt());
     }
 }

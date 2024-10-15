@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,7 +29,7 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLWrite;
 
-use Kigkonsult\DsigSdk\Dto\Signature;
+use Kigkonsult\DsigSdk\Dto\SignatureType;
 
 /**
  * Class SignatureTypeWriter
@@ -39,35 +39,30 @@ class SignatureTypeWriter extends DsigWriterBase
     /**
      * Write
      *
-     * Note, self::obtainXMLattributes() NOT used here
-     *
-     * @param Signature $subject
+     * @param SignatureType $signatureType
      */
-    public function write( Signature $subject ) : void
+    public function write( SignatureType $signatureType )
     {
-        $this->setWriterStartElement(
-            self::SIGNATURE,
-            ( $subject->isXMLattributesSet() ? $subject->getXMLattributes() : self::DSIGXMLAttributes )
-        );
+        $XMLattributes = $signatureType->getXMLattributes();
+        parent::setWriterStartElement( $this->writer, self::SIGNATURE, $XMLattributes);
 
-        if( $subject->isIdSet()) {
-            $this->writeAttribute( self::ID, $subject->getId());
-        }
-        if( $subject->isSignedInfoSet()) {
-            SignedInfoTypeWriter::factory( $this->writer)->write( $subject->getSignedInfo());
-        }
-        if( $subject->isSignatureValueSet()) {
-            SignatureValueTypeWriter::factory( $this->writer)->write( $subject->getSignatureValue());
-        }
-        if( $subject->isKeyInfoSet()) {
-            KeyInfoTypeWriter::factory( $this->writer)->write( $subject->getKeyInfo());
-        }
-        if( $subject->isObjectSet()) {
-            foreach( $subject->getObject() as $object ) {
-                ObjectTypeWriter::factory( $this->writer )->write( $object );
-            }
-        }
+        parent::writeAttribute( $this->writer, self::ID, $signatureType->getId());
 
+        $signedInfo = $signatureType->getSignedInfo();
+        if( ! empty( $signedInfo )) {
+            SignedInfoTypeWriter::factory( $this->writer)->write( $signedInfo );
+        }
+        $signatureValue = $signatureType->getSignatureValue();
+        if( ! empty( $signatureValue )) {
+            SignatureValueTypeWriter::factory( $this->writer)->write( $signatureValue );
+        }
+        $keyInfo = $signatureType->getKeyInfo();
+        if( ! empty( $keyInfo )) {
+            KeyInfoTypeWriter::factory( $this->writer)->write( $keyInfo );
+        }
+        foreach( $signatureType->getObject() as $object ) {
+            ObjectTypeWriter::factory( $this->writer )->write( $object );
+        }
         $this->writer->endElement();
     }
 }

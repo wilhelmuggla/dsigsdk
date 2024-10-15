@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,7 +29,7 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLWrite;
 
-use Kigkonsult\DsigSdk\Dto\Any;
+use Kigkonsult\DsigSdk\Dto\AnyType;
 
 /**
  * Class AnyTypeWriter
@@ -39,27 +39,22 @@ class AnyTypeWriter extends DsigWriterBase
     /**
      * Write
      *
-     * @param Any $subject
-     * @return void
+     * @param AnyType $anyType
      */
-    public function write( Any $subject ) : void
-    {
-        $this->setWriterStartElement(
-            ( $subject->isElementNameSet() ? $subject->getElementName() : self::ANY ),
-            self::obtainXMLattributes( $subject )
-        );
+    public function write( AnyType $anyType ) {
+        parent::setWriterStartElement( $this->writer, $anyType->getElementName(), $anyType->getXMLattributes());
 
-        if( $subject->isAttributesSet()) {
-            foreach( $subject->getAttributes() as $key => $value ) {
-                $this->writeAttribute( $key, $value );
-            }
+        foreach( $anyType->getAttributes() as $key => $value ) {
+            parent::writeAttribute( $this->writer, $key, $value );
         }
-        if( $subject->isContentSet()) {
-            $this->writer->text( $subject->getContent());
+
+        $content = $anyType->getContent();
+        if( null !== $content ) {
+            $this->writer->text( $content );
         }
-        elseif( $subject->isAnySet()) {
-            foreach( $subject->getAny() as $element ) {
-                self::factory( $this->writer )->write( $element );
+        else {
+            foreach( $anyType->getAny() as $element ) {
+                AnyTypeWriter::factory( $this->writer )->write( $element );
             }
         }
 

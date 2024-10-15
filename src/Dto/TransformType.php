@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -30,7 +30,6 @@ declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\Dto;
 
 use InvalidArgumentException;
-use Kigkonsult\DsigSdk\Dto\Traits\AlgorithmTrait;
 use Webmozart\Assert\Assert;
 
 use function is_array;
@@ -43,34 +42,20 @@ use function sprintf;
 class TransformType extends DsigBase
 {
     /**
-     * @var array choice minOccurs="0" maxOccurs="unbounded"
-     *
-     * each element is (keyed) Any or XPath (string)
+     * @var array each element is (keyed) AnyType or XPath (string)
      *
      *   [ self::XPATH   => <string> ]
-     *   [ self::ANYTYPE => Any ]
+     *   [ self::ANYTYPE => AnyType ]
      *
      */
-    protected array $transformTypes = [];
+    protected $transformTypes = [];
 
     /**
      * Property, get- and setter methods for
      * var string algorithm
      *            attribute name="Algorithm" type="anyURI" use="required"
      */
-    use AlgorithmTrait;
-
-
-    /**
-     * Factory method with required algorithm
-     *
-     * @param string $algorithm
-     * @return static
-     */
-    public static function factoryAlgorithm( string $algorithm ) : static
-    {
-        return self::factory()->setAlgorithm( $algorithm );
-    }
+    use Traits\AlgorithmTrait;
 
     /**
      * @return array
@@ -81,32 +66,19 @@ class TransformType extends DsigBase
     }
 
     /**
-     * Return bool true if transformTypes is not empty
-     *
-     * @return bool
-     */
-    public function isTransformTypesSet() : bool
-    {
-        return ! empty( $this->transformTypes );
-    }
-
-    /**
      * @param string $type
      * @param mixed  $transformType
      * @return static
      * @throws InvalidArgumentException
      */
-    public function addTransformType( string $type, mixed $transformType ) : static
+    public function addTransformType( string $type, $transformType ) : self
     {
         switch( $type ) {
             case self::XPATH :
                 Assert::string( $transformType );
                 break;
-            case  self::ANY :
-                // fall through
-                $type = self::ANYTYPE; // fall through
             case self::ANYTYPE :
-                Assert::isInstanceOf( $transformType, Any::class );
+                Assert::isInstanceOf( $transformType, AnyType::class );
                 break;
             default :
                 throw new InvalidArgumentException(
@@ -127,7 +99,7 @@ class TransformType extends DsigBase
      * @return static
      * @throws InvalidArgumentException
      */
-    public function setTransformTypes( array $transformTypes ) : static
+    public function setTransformTypes( array $transformTypes ) : self
     {
         foreach( $transformTypes as $ix => $element ) {
             if( ! is_array( $element )) {

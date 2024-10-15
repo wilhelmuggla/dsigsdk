@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,7 +29,7 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\XMLWrite;
 
-use Kigkonsult\DsigSdk\Dto\RetrievalMethod;
+use Kigkonsult\DsigSdk\Dto\RetrievalMethodType;
 
 /**
  * Class RetrievalMethodTypeWriter
@@ -38,21 +38,21 @@ class RetrievalMethodTypeWriter extends DsigWriterBase
 {
     /**
      * Write
-     * @param RetrievalMethod $subject
+     * @param RetrievalMethodType $retrievalMethodType
      *
      */
-    public function write( RetrievalMethod $subject ) : void
+    public function write( RetrievalMethodType $retrievalMethodType )
     {
-        $this->setWriterStartElement( self::RETRIEVALMETHOD, self::obtainXMLattributes( $subject ));
+        parent::setWriterStartElement(
+            $this->writer, self::RETRIEVALMETHOD, $retrievalMethodType->getXMLattributes()
+        );
 
-        if( $subject->isURISet()) {
-            $this->writeAttribute( self::URI, $subject->getURI());
-        }
-        if( $subject->isTypeSet()) {
-            $this->writeAttribute( self::TYPE, $subject->getType());
-        }
-        if( $subject->isTransformsSet()) {
-            TransformsTypeWriter::factory( $this->writer)->write( $subject->getTransforms());
+        parent::writeAttribute( $this->writer, self::URI,  $retrievalMethodType->getURI());
+        parent::writeAttribute( $this->writer, self::TYPE, $retrievalMethodType->getType());
+
+        $transforms = $retrievalMethodType->getTransforms();
+        if( ! empty( $transforms )) {
+            TransformsTypeWriter::factory( $this->writer)->write( $transforms );
         }
 
         $this->writer->endElement();

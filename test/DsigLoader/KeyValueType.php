@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,34 +29,29 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\DsigLoader;
 
-use Exception;
+use Kigkonsult\DsigSdk\Dto\KeyValueType as Dto;
 use Faker;
-use Kigkonsult\DsigSdk\Dto\Transform  as TransformDto;
-use Kigkonsult\DsigSdk\Dto\Transforms as TransformsDto;
 
-class Transforms implements DsigLoaderInterface
+class KeyValueType
 {
     /**
-     * @return TransformsDto
-     * @throws Exception
+     * @return Dto
+     * @access static
      */
-    public static function loadFromFaker() : TransformsDto
+    public static function loadFromFaker() : Dto
     {
         $faker = Faker\Factory::create();
 
-        $max        = random_int( 0, 2 );
-        $transforms = [];
-        for( $x = 0; $x <= $max; $x++ ) {
-            $transforms[] = $faker->boolean()
-            ? Transform::loadFromFaker()
-            : TransformDto::factoryAlgorithm( self::ALGORITHMS[random_int( 0, count( self::ALGORITHMS ) - 1 )] );
+        switch( $faker->numberBetween( 1, 3 )) {
+            case 1 :
+                return Dto::factory()
+                          ->setDSAKeyValue( DSAKeyValueType::loadFromFaker());
+            case 2 :
+                return Dto::factory()
+                          ->setRSAKeyValue( RSAKeyValueType::loadFromFaker());
+            default :
+                return Dto::factory()
+                          ->setAny( AnyType::loadFromFaker());
         }
-        $dto = $faker->boolean()
-            ? TransformsDto::factoryTransform( Transform::loadFromFaker())
-            : TransformsDto::factoryTransformAlgorithm( self::ALGORITHMS[random_int( 0, count( self::ALGORITHMS ) - 1 )] );
-        if( ! empty( $transforms )) {
-            $dto->setTransform( $transforms );
-        }
-        return $dto;
     }
 }

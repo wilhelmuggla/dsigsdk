@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,70 +29,56 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\DsigLoader;
 
-use Exception;
-use Kigkonsult\DsigSdk\Dto\Any as Dto;
+use Kigkonsult\DsigSdk\Dto\AnyType as Dto;
 use Faker;
 
-class Any implements DsigLoaderInterface
+class AnyType implements DsigLoaderInterface
 {
     /**
      * @param int $iterateCnt
      * @return Dto
-     * @throws Exception
+     * @access static
      */
-    public static function loadFromFaker( ? int $iterateCnt = 3 ) : Dto
+    public static function loadFromFaker( int $iterateCnt = 3 ) : Dto
     {
-        static $SEARCH  = '/[^A-Za-z0-9]/';
-        static $SP0     = '';
-        static $SP1     = ' ';
-        static $DOTHTML = '.html';
-        static $DOTXML  = '.xml';
-        static $SLASH   = '/';
+        static $search = '/[^A-Za-z0-9]/';
         $faker = Faker\Factory::create();
 
-        $elementName = $SP0;
-        foreach( explode( $SP1, $faker->catchPhrase ) as $part ) {
-            $elementName .= ucfirst( strtolower( preg_replace( $SEARCH, $SP0, $part )));
+        $elementNamePart = [];
+        foreach( explode( ' ', $faker->catchPhrase ) as $part ) {
+            $elementNamePart[] = ucfirst( strtolower( preg_replace( $search, '', $part )));
         }
-        $uri = str_replace( $DOTHTML, $DOTXML, $faker->url );
-        if( str_ends_with( $uri, $SLASH ) ) {
-            $uri .= $DOTXML;
+        $uri = str_replace( '.html', '§', $faker->url );
+        if( '/' == substr( $uri, -1 )) {
+            $uri .= 'abc§';
         }
-        $dto = Dto::factoryElementName( $elementName )
-            ->setXMLattribute( Dto::XMLNS, $uri );
-
+        $dto = Dto::factory()
+                  ->setXMLattribute( Dto::XMLNS, $uri )
+                  ->setElementName( implode( '', $elementNamePart ));
         $attributes = [];
-        if( 1 === random_int( 1, 3 )) {
-            $attributes[self::ALGORITM] = self::ALGORITHMS[random_int( 0, count( self::ALGORITHMS ) - 1 )];
+        if( 1 == $faker->numberBetween( 1, 3 )) {
+            $attributes[self::ALGORITM] = self::ALGORITHMS[mt_rand( 0, count( self::ALGORITHMS ) - 1 )];
         }
-        if( 1 === random_int( 1, 3 )) {
+        if( 1 == $faker->numberBetween( 1, 3 )) {
             $attributes[self::ID] = $faker->swiftBicNumber;
         }
         if( ! empty( $attributes )) {
             $dto->setAttributes( $attributes );
         }
 
-        --$iterateCnt;
-        if(( 0 >= $iterateCnt ) || ( 1 === random_int( 1, 3 ))) {
+        $iterateCnt -= 1;
+        if( empty( $iterateCnt ) || ( 1 == $faker->numberBetween( 1, 3 ))) {
             $dto->setContent( $faker->md5 );
         }
         else {
-            $dto->setAny( self::getSomeAnys());
+            $max  = $faker->numberBetween( 1, 3 );
+            $anys = [];
+            for( $x = 0; $x <= $max; $x++ ) {
+                $anys[] = AnyType::loadFromFaker( $iterateCnt );
+            }
+            $dto->setAny( $anys );
         }
 
         return $dto;
-    }
-
-    /**
-     * @return Dto[]
-     */
-    public static function getSomeAnys() : array
-    {
-        $max  = random_int( 1, 2 );
-        $anys = [];
-        for( $x = 0; $x <= $max; $x++ ) {
-            $anys[] = self::loadFromFaker( 0 ); // no sub-anys...
-        }
-        return $anys;
     }
 }

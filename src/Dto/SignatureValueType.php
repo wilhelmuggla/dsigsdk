@@ -6,7 +6,7 @@
  * This file is a part of DsigSdk.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2019-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2019-21 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software DsigSdk.
  *            The above copyright, link, package and version notices,
@@ -29,60 +29,37 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\DsigSdk\Dto;
 
-use Kigkonsult\DsigSdk\Dto\Traits\IdTrait;
-
 /**
  * Class SignatureValueType
  */
 class SignatureValueType extends DsigBase
 {
     /**
-     * @var null|string
+     * @var string
      *            base="base64Binary"
      */
-    protected ?string $signatureValueType = null;
+    protected $signatureValueType = null;
 
     /**
      * Property, get- and setter methods for
      * var string id
      *            attribute name="Id" type="ID" use="optional"
      */
-    use IdTrait;
-
-    /**
-     * Factory method with required signatureValueType
-     *
-     * @param string $signatureValueType
-     * @return static
-     */
-    public static function factorySignatureValueType( string $signatureValueType ) : static
-    {
-        return self::factory()->setSignatureValueType( $signatureValueType );
-    }
+    use Traits\IdTrait;
 
     /**
      * @return null|string
      */
-    public function getSignatureValueType() : ?string
+    public function getSignatureValueType()
     {
         return $this->signatureValueType;
     }
 
     /**
-     * Return bool true if signatureValueType is set
-     *
-     * @return bool
-     */
-    public function isSignatureValueTypeSet() : bool
-    {
-        return ( null !== $this->signatureValueType );
-    }
-
-    /**
      * @param string $signatureValueType
      * @return static
      */
-    public function setSignatureValueType( string $signatureValueType ) : static
+    public function setSignatureValueType( string $signatureValueType ) : self
     {
         $this->signatureValueType = $signatureValueType;
         return $this;
